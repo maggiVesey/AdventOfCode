@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+
+function Instruction(direction,distance) {
+    this.direction = direction;
+    this.distance = distance;
+}
+const instructions = [];
+
+function Position(horizontal,depth,aim) {
+    this.horizontal = horizontal,
+    this.depth = depth,
+    this.aim = aim,
+    
+    this.move = function(instruction) {
+		switch(instruction.direction) { 
+			case 'down':
+				this.aim += instruction.distance;
+			break;
+			case 'up':
+				this.aim -= instruction.distance;
+			break;
+			case 'forward':
+				this.horizontal += instruction.distance;
+				this.depth += instruction.distance * this.aim;
+			break;
+		}
+		return this;
+    }
+}
+
+var finalPosition;
+
+function aocFunction(input) {
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+        const file = event.target.result;
+        const allLines = file.split(/\r\n|\n/);
+
+        allLines.forEach((line) => {
+            if(''!=line) {
+        		let instruction = line.split(' ');
+        		instructions.push(new Instruction(instruction[0],parseInt(instruction[1],10)))
+          }
+        });
+        
+ 		let finalPosition = instructions.reduce((position, thisInstruction) => 
+		{        
+			return position.move(thisInstruction);
+		}
+		,new Position(0,0,0)); 
+		
+        result = finalPosition.horizontal * finalPosition.depth;
+        document.getElementById('result').append(result);
+    };
+
+    reader.onerror = (event) => {
+        alert(event.target.error.name);
+    };
+
+    reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
