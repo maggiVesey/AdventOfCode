@@ -13,9 +13,9 @@ function Instruction(direction,distance) {
 const instructions = [];
 
 function Position(horizontal,depth,aim) {
-    this.horizontal = horizontal,
-    this.depth = depth,
-    this.aim = aim,
+    this.horizontal = horizontal;
+    this.depth = depth;
+    this.aim = aim;
     
     this.move = function(instruction) {
 		switch(instruction.direction) { 
