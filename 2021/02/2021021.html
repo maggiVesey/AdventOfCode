@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+var horizontal = 0;
+var depth = 0;
+
+function aocFunction(input) {
+
+    const file = input.files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+        const file = event.target.result;
+        const allLines = file.split(/\r\n|\n/);
+
+        allLines.forEach((line) => {
+            if(''!=line) {
+        		let instruction = line.split(' ');
+        		switch(instruction[0]) {
+        		case 'down':
+        			depth += parseInt(instruction[1],10)
+        			break;
+       			case 'up':
+        			depth -= parseInt(instruction[1],10)
+        			break;
+       			case 'forward':
+       				horizontal += parseInt(instruction[1],10)
+        			break;
+        		}
+            }
+        });
+        result = horizontal * depth;
+        document.getElementById('result').append(result);
+    };
+
+    reader.onerror = (event) => {
+        alert(event.target.error.name);
+    };
+
+    reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
