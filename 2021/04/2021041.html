@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+
+const dobber = 'X';
+var cards = [];
+var bingoNumbers = [];
+const scoreboard = [];
+
+var numbersInput = false;
+
+function Score(callIndex,cardNumber,finalScore) {
+	this.callIndex = callIndex;
+	this.cardNumber = cardNumber;
+	this.finalScore = finalScore;
+}
+function calculateScore(bingoNumber,card) {
+	let sumOfUnmarkedNumbers = card.flat().reduce((a,b) => (b != dobber)? a + parseInt(b) : a, 0);
+	return bingoNumber * sumOfUnmarkedNumbers;
+}
+function isComplete(rowOrColumn) {
+	return rowOrColumn.every((x) => (x == dobber));
+}
+function cardColumn(card, column) {
+	return card.map(a=> a[column]);
+}
+function bingo(card) {
+	for(let i=0;i<card.length;i++) {
+		if(isComplete(card[i])) {
+			return true;
+		}
+	}
+	for(let i=0;i<card.length;i++) {
+		if(isComplete(cardColumn(card,i))) {
+			return true;
+		}
+	}
+	return false;
+}
+function checkCard(card){
+	console.log('checkCard',card)
+	for(let i=0;i<bingoNumbers.length;i++) {
+		for(let j=0;j<card.length;j++) {
+			for(let k=0;k<card[j].length;k++) {
+				if(bingoNumbers[i] == card[j][k]) {
+					card[j][k] = dobber;
+					// save tiny amount of processing by only checking card after 5 numbers
+					if(i>=4 && bingo(card)) {
+						scoreboard.push(new Score(i,j,calculateScore(bingoNumbers[i],card)))
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let bingoCardIndex = -1;
+
+		allLines.forEach((line) => {
+			if(numbersInput) {
+				if('' == line.trim()) {
+					if(bingoCardIndex >= 0) {
+						checkCard(cards[bingoCardIndex])
+					}
+					cards[++bingoCardIndex] = [];
+				}
+				if(''!=line.trim()) {
+					cards[bingoCardIndex].push(line.trim().split(/\s+/));
+				}
+			}
+			else {
+				bingoNumbers = line.split(',');
+				numbersInput = true;
+			}
+		});
+		if(bingoCardIndex >= 0) {
+			checkCard(cards[bingoCardIndex])
+		}
+		//which card was marked earliest
+		scoreboard.sort((a,b) => {return a.callIndex - b.callIndex});	
+		
+		result = scoreboard[0].finalScore;
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
