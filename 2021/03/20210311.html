@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+
+const countDigits = [];
+
+var countLines=0;
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				let binaryLine = line.split('');
+				for(let i=0;i<binaryLine.length;i++){
+					if(isNaN(countDigits[i])) {
+						countDigits.push(0);
+					}
+					countDigits[i] += ((1 == parseInt(binaryLine[i],10)) ? 1 : 0)
+				}
+				countLines++
+			}
+		});
+
+		let gamma = '';
+		let epsilon = '';
+
+		for(let i=0;i<countDigits.length;i++){
+			gamma += (countDigits[i] > countLines / 2) ? '1' :'0';
+			epsilon += (countDigits[i] < countLines / 2) ? '1' :'0';
+		}
+		result = parseInt(gamma,2) * parseInt(epsilon,2)
+
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
