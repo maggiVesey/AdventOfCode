@@ -8,29 +8,29 @@ const depths = [];
 
 function aocFunction(input) {
 
-    const file = input.files[0];
-    const reader = new FileReader();
+	const file = input.files[0];
+	const reader = new FileReader();
 
-    reader.onload = (event) => {
-        const file = event.target.result;
-        const allLines = file.split(/\r\n|\n/);
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
 
-        allLines.forEach((line) => {
-            if(''!=line){
+		allLines.forEach((line) => {
+			if(''!=line){
 				depths.push(parseInt(line,10));
 			}
-        });
-        let result = depths.reduce((previousValue, currentValue, currentIndex, array) => 
-        	currentIndex > 0 && currentValue > array[currentIndex-1] ? previousValue + 1 : previousValue,0)
+		});
+		let result = depths.reduce((previousValue, currentValue, currentIndex, array) => 
+			currentIndex > 0 && currentValue > array[currentIndex-1] ? previousValue + 1 : previousValue,0)
 
-        document.getElementById('result').append(result);
-    };
+		document.getElementById('result').append(result);
+	};
 
-    reader.onerror = (event) => {
-        alert(event.target.error.name);
-    };
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
 
-    reader.readAsText(file);
+	reader.readAsText(file);
 }
 
 window.onload = function() {

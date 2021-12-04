@@ -7,61 +7,61 @@
 var result;
 
 function Instruction(direction,distance) {
-    this.direction = direction;
-    this.distance = distance;
+	this.direction = direction;
+	this.distance = distance;
 }
 const instructions = [];
 
 function Position(horizontal,depth,aim) {
-    this.horizontal = horizontal;
-    this.depth = depth;
-    this.aim = aim;
+	this.horizontal = horizontal;
+	this.depth = depth;
+	this.aim = aim;
 }
 
 function aocFunction(input) {
 
-    const file = input.files[0];
-    const reader = new FileReader();
+	const file = input.files[0];
+	const reader = new FileReader();
 
-    reader.onload = (event) => {
-        const file = event.target.result;
-        const allLines = file.split(/\r\n|\n/);
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
 
-        allLines.forEach((line) => {
-            if(''!=line) {
-        		let instruction = line.split(' ');
-        		instructions.push(new Instruction(instruction[0],parseInt(instruction[1],10)))
-          }
-        });
-        
-                                      // reduce (accumulator, item)
+		allLines.forEach((line) => {
+			if(''!=line) {
+				let instruction = line.split(' ');
+				instructions.push(new Instruction(instruction[0],parseInt(instruction[1],10)))
+		  }
+		});
+		
+										// reduce (accumulator, item)
  		let finalPosition = instructions.reduce((position, thisInstruction) => 
-		{        
+		{		
 			switch(thisInstruction.direction) { // accumulator function
-    		case 'down':
-    			position.aim += thisInstruction.distance
-    			break;
-   			case 'up':
-   				position.aim -= thisInstruction.distance
-    			break;
-   			case 'forward':
-   				position.horizontal += thisInstruction.distance
-   				position.depth += thisInstruction.distance * position.aim
-    			break;
-    		}
+			case 'down':
+				position.aim += thisInstruction.distance
+				break;
+				case 'up':
+					position.aim -= thisInstruction.distance
+				break;
+				case 'forward':
+					position.horizontal += thisInstruction.distance
+					position.depth += thisInstruction.distance * position.aim
+				break;
+			}
 			return position;
 		}
 		,new Position(0,0,0)) // initial value
 		
-        result = finalPosition.horizontal * finalPosition.depth;
-        document.getElementById('result').append(result);
-    };
+		result = finalPosition.horizontal * finalPosition.depth;
+		document.getElementById('result').append(result);
+	};
 
-    reader.onerror = (event) => {
-        alert(event.target.error.name);
-    };
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
 
-    reader.readAsText(file);
+	reader.readAsText(file);
 }
 
 window.onload = function() {

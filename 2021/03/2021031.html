@@ -4,9 +4,12 @@
 <title>Advent of Code</title>
 <script>
 
-var result;
-var horizontal = 0;
-var depth = 0;
+var result = 0;
+
+//const countDigits = [0,0,0,0,0];
+const countDigits = [0,0,0,0,0,0,0,0,0,0,0,0];
+
+var countLines=0;
 
 function aocFunction(input) {
 
@@ -19,21 +22,23 @@ function aocFunction(input) {
 
 		allLines.forEach((line) => {
 			if(''!=line) {
-				let instruction = line.split(' ');
-				switch(instruction[0]) {
-				case 'down':
-					depth += parseInt(instruction[1],10)
-					break;
-					case 'up':
-					depth -= parseInt(instruction[1],10)
-					break;
-					case 'forward':
-						horizontal += parseInt(instruction[1],10)
-					break;
+				let binaryLine = line.split('');
+				for(let i=0;i<binaryLine.length;i++){
+					countDigits[i] += ((1 == parseInt(binaryLine[i],10)) ? 1 : 0)
 				}
+				countLines++
 			}
 		});
-		result = horizontal * depth;
+
+		let gamma = '';
+		let epsilon = '';
+
+		for(let i=0;i<countDigits.length;i++){
+			gamma += (countDigits[i] > countLines / 2) ? '1' :'0';
+			epsilon += (countDigits[i] < countLines / 2) ? '1' :'0';
+		}
+		result = parseInt(gamma,2) * parseInt(epsilon,2)
+
 		document.getElementById('result').append(result);
 	};
 

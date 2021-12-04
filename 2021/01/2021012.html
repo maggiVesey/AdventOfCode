@@ -10,38 +10,38 @@ var lastDepth = -1;
 
 function aocFunction(input) {
 
-    const file = input.files[0];
-    const reader = new FileReader();
+	const file = input.files[0];
+	const reader = new FileReader();
 
-    reader.onload = (event) => {
-        const file = event.target.result;
-        const allLines = file.split(/\r\n|\n/);
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
 
-        allLines.forEach((line) => {
-            if(''!=line){
-            	// add this line to the end and lose the first element
-            	// use comma operator 'cos we don't care about results
+		allLines.forEach((line) => {
+			if(''!=line){
+				// add this line to the end and lose the first element
+				// use comma operator 'cos we don't care about results
 				depths.push(parseInt(line,10)), depths.shift()
 				// we're only interested when the first one is populated from our input file
 				if(depths[0]>0) {
 					// add up the 3 values for this 'window'
-				    let sumDepth = depths.reduce((a,b)=>a+b)
+					let sumDepth = depths.reduce((a,b)=>a+b)
 					if(sumDepth > lastDepth && lastDepth > 0) {
-					    result++
+						result++
 					}
 					lastDepth = sumDepth;
 				}
 			}
-        });
+		});
 
-        document.getElementById('result').append(result);
-    };
+		document.getElementById('result').append(result);
+	};
 
-    reader.onerror = (event) => {
-        alert(event.target.error.name);
-    };
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
 
-    reader.readAsText(file);
+	reader.readAsText(file);
 }
 
 window.onload = function() {

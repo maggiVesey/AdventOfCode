@@ -10,32 +10,32 @@ var lastDepth = -1;
 
 function aocFunction(input) {
 
-    const file = input.files[0];
-    const reader = new FileReader();
+	const file = input.files[0];
+	const reader = new FileReader();
 
-    reader.onload = (event) => {
-        const file = event.target.result;
-        const allLines = file.split(/\r\n|\n/);
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
 
-        allLines.forEach((line) => {
-            if(''!=line){
+		allLines.forEach((line) => {
+			if(''!=line){
 				depths.push(parseInt(line,10)), depths.shift()
 				// we're only interested when the first one is populated from our input file
 				// the difference between sum(d,e,f) and sum(c,d,e) id the difference between f and c 
 				if(depths[3] > depths[0] && depths[0] > 0) {
-				    result++
+					result++
 				}
 			}
-        });
+		});
 
-        document.getElementById('result').append(result);
-    };
+		document.getElementById('result').append(result);
+	};
 
-    reader.onerror = (event) => {
-        alert(event.target.error.name);
-    };
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
 
-    reader.readAsText(file);
+	reader.readAsText(file);
 }
 
 window.onload = function() {
