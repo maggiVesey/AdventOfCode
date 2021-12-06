@@ -1,0 +1,157 @@
+<!DOCTRowPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+const ventLines = [];
+var ventMap;
+var maxColumn = 0;
+var maxRow = 0;
+
+function maxDimension(thisLine) {
+	if(thisLine.startColumn > maxColumn) {
+		maxColumn = thisLine.startColumn;
+	}
+	if(thisLine.endColumn > maxColumn) {
+		maxColumn = thisLine.endColumn;
+	}
+	if(thisLine.startRow > maxRow) {
+		maxRow = thisLine.startRow;
+	}
+	if(thisLine.endRow > maxRow) {
+		maxRow = thisLine.endRow;
+	}
+}
+function ventLine(startColumn,startRow,endColumn,endRow) {
+	this.startColumn = startColumn;
+	this.startRow = startRow;
+	this.endColumn = endColumn;
+	this.endRow = endRow;
+}
+function addLineToMap(thisLine) {
+
+	if(thisLine.startColumn == thisLine.endColumn) {
+		if(thisLine.startRow >= thisLine.endRow) { // vertical up
+//			console.log(thisLine)
+			for(let i=thisLine.endRow; i<=thisLine.startRow;i++) {
+//				console.log('ai',i,'columnIndex',thisLine.startColumn)
+				ventMap[i][thisLine.startColumn]++
+			}
+		}
+		else { //vertical down
+//			console.log(thisLine)
+			for(let i=thisLine.startRow; i<=thisLine.endRow;i++) {
+//				console.log('bi',i,'columnIndex',thisLine.startColumn)
+				ventMap[i][thisLine.startColumn]++
+			}
+		}
+	}
+	else if(thisLine.startRow == thisLine.endRow) {  //horizontal r->l
+		if(thisLine.startColumn >= thisLine.endColumn) {
+//			console.log(thisLine)
+			for(let i=thisLine.endColumn; i<=thisLine.startColumn;i++) {
+//				console.log('ci',thisLine.startRow,'columnIndex',i)
+				ventMap[thisLine.startRow][i]++
+			}
+		}
+		else { //horizontal l->r
+//			console.log(thisLine)
+			for(let i=thisLine.startColumn; i<=thisLine.endColumn;i++) {
+//				console.log('di',thisLine.startRow,'columnIndex',i)
+				ventMap[thisLine.startRow][i]++
+			}
+		}
+	}
+	else { 
+		if(thisLine.startColumn <= thisLine.endColumn) { //NE
+			if(thisLine.startRow >= thisLine.endRow) {
+//				console.log(thisLine)
+				let columnIndex = thisLine.startColumn;
+				for(let i=thisLine.startRow; i>=thisLine.endRow;i--) {
+//					console.log('ei',i,'columnIndex',columnIndex)
+					ventMap[i][columnIndex++]++;
+				}
+			}
+ 			else { //SE
+//				console.log(thisLine)
+ 				let columnIndex = thisLine.startColumn;
+ 				for(let i=thisLine.startRow; i<=thisLine.endRow;i++) {
+//					console.log('fi',i,'columnIndex',columnIndex)
+					ventMap[i][columnIndex++]++;
+ 				}
+ 			}
+		}
+ 		else {
+ 			if(thisLine.startRow >= thisLine.endRow) { //NW
+//				console.log(thisLine)
+ 				let columnIndex = thisLine.startColumn;
+ 				for(let i=thisLine.startRow;i>=thisLine.endRow;i--) {
+//					console.log('gi',i,'columnIndex',columnIndex)
+ 					ventMap[i][columnIndex--]++;
+ 				}
+ 			}
+ 			else { //SW
+//				console.log(thisLine)
+				let columnIndex = thisLine.startColumn;
+ 				for(let i=thisLine.startRow; i<=thisLine.endRow;i++) {
+//					console.log('hi',i,'columnIndex',columnIndex)
+					ventMap[i][columnIndex--]++;
+ 				}
+ 			}
+ 		}
+	}
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				let vents = line.split(/ -> /);
+				let start = vents[0].split(',');
+				let end = vents[1].split(',');
+				
+				let thisLine = new ventLine(parseInt(start[0],10),parseInt(start[1],10),parseInt(end[0],10),parseInt(end[1],10));
+
+				ventLines.push(thisLine);
+				maxDimension(thisLine);
+			}
+		});
+		
+		ventMap = Array.from(Array(maxRow+1), () => Array(maxColumn+1).fill(0))
+		ventLines.forEach(addLineToMap);
+		console.log(ventMap)
+		result = ventMap.flat().filter(x => x > 1).length;
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
+
