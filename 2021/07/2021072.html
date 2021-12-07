@@ -12,7 +12,7 @@ function calcFuel(midPoint) {
 
 	fuelUsed = initialPositions.reduce((fuelUsed,nextCrabPosition) =>
 	{
-		let distance = Math.abs(nextCrabPosition - midPoint);
+		let distance = Math.abs(parseInt(nextCrabPosition,10) - midPoint);
 		return fuelUsed += distance * (distance + 1) / 2;  // use formula for sum of integers from 1 to distance
 	},
 	fuelUsed);
