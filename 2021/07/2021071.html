@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+var initialPositions = [];
+
+function calcFuel(midPoint) {
+	let fuelUsed = 0;
+
+	fuelUsed = initialPositions.reduce((fuelUsed,nextCrabPosition) =>
+	{
+		return fuelUsed += Math.abs(parseInt(nextCrabPosition,10) - parseInt(midPoint,10));
+	},
+	fuelUsed);
+	
+	return fuelUsed;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				initialPositions = line.split(',').sort((a,b) => a - b);
+			}
+		});
+
+		
+		// get median or medians
+		if (1 == initialPositions.length % 2) {
+			result = calcFuel(initialPositions[(initialPositions.length + 1) / 2])
+		}
+		else {
+			let fuel1 = calcFuel(initialPositions[initialPositions.length / 2]);
+			let fuel2 = calcFuel(initialPositions[(initialPositions.length / 2) - 1]);
+			result = (fuel1 < fuel2) ? fuel1 : fuel2;
+		}
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
