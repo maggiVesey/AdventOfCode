@@ -8,9 +8,11 @@ var result;
 var fishAges =  [0,0,0,0,0,0,0,0,0]
 
 function ageFish(days) {
-	for(let i=0;i<days;i++) {
-		let readyToPop = fishAges[0]
-		for(let j=0;j<=8;j++) {
+	for(let i = 0 ; i < days ; i++) {
+		
+		let readyToPop = fishAges[0];
+		
+		for(let j = 0 ; j <= 8 ; j++) {
 			fishAges[j] = fishAges[j+1];
 		}
 		fishAges[6] += readyToPop;
@@ -30,8 +32,8 @@ function aocFunction(input) {
 			if(''!=line) {
 				fishAges = line.split(',').reduce((fishAges,nextAge) =>
 				{
-					fishAges[parseInt(nextAge,10)]++
-					return fishAges
+					fishAges[parseInt(nextAge,10)]++;
+					return fishAges;
 				},
 				fishAges)
 			}
@@ -39,7 +41,7 @@ function aocFunction(input) {
 
 		ageFish(256);
 		
-		result = fishAges.reduce((a, b) => a + b)
+		result = fishAges.reduce((a, b) => a + b);
 		document.getElementById('result').append(result);
 	};
 
