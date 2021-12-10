@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+
+//   abcdefg
+// 0:1110111
+// 1:0010010
+// 2:1011101
+// 3:1011011
+// 4:0111010
+// 5:1101011
+// 6:1101111
+// 7:1010010
+// 8:1111111
+// 9:1111011
+
+const segments = [6,2,5,5,4,5,6,3,7,6]
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				let notes = line.split('|');
+				let outputValues = notes[1].trim().split(' ');
+				for (let i=0;i<outputValues.length;i++){
+					if(outputValues[i].length == segments[1] || outputValues[i].length == segments[4] || outputValues[i].length == segments[7] || outputValues[i].length == segments[8]) {
+						result++
+					}
+				}
+			}
+		});
+
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>

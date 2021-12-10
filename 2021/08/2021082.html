@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	span {
+		display:inline-block;
+		width:25px;
+		height:30px;
+	}
+</style>
+<script>
+
+var result = 0;
+
+const segments = [6,2,5,5,4,5,6,3,7,6]
+
+function clearDisplay() {
+	Array.from(document.getElementsByTagName('span')).forEach((el) => el.textContent = '');
+}
+function showDisplay(display) {
+	Array.from(document.getElementsByClassName("a")).forEach((el) => el.textContent = display[0]);
+	Array.from(document.getElementsByClassName("b")).forEach((el) => el.textContent = display[1]);
+	Array.from(document.getElementsByClassName("c")).forEach((el) => el.textContent = display[2]);
+	Array.from(document.getElementsByClassName("d")).forEach((el) => el.textContent = display[3]);
+	Array.from(document.getElementsByClassName("e")).forEach((el) => el.textContent = display[4]);
+	Array.from(document.getElementsByClassName("f")).forEach((el) => el.textContent = display[5]);
+	Array.from(document.getElementsByClassName("g")).forEach((el) => el.textContent = display[6]);
+}
+function difference(setA, setB) {
+    let _difference = new Set(setA)
+    for (let elem of setB) {
+        _difference.delete(elem)
+    }
+    return _difference
+}
+function isSuperset(set, subset) {
+    for (let elem of subset) {
+        if (!set.has(elem)) {
+            return false
+        }
+    }
+    return true
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				
+				let display = ['','','','','','',''];
+				let outputNumber = [0,0,0,0];
+				
+//				clearDisplay();
+				
+				let zeroSet = new Set();
+				let oneSet = new Set();
+				let twoSet = new Set();
+				let threeSet = new Set();
+				let fourSet = new Set();
+				let fiveSet = new Set();
+				let sixSet = new Set();
+				let sevenSet = new Set();
+				let eightSet = new Set();
+				let nineSet = new Set();
+				
+				let notes = line.split('|');
+				let inputValues = notes[0].trim().split(' ');
+								
+				for (let i=0;i<inputValues.length;i++){
+
+					if(inputValues[i].length == segments[1]) {
+						oneSet = new Set(inputValues[i].split(''));
+						continue;
+					}
+					else if(inputValues[i].length == segments[4]) {
+						fourSet = new Set(inputValues[i].split(''));
+						continue;
+					}
+					else if(inputValues[i].length == segments[7]) {
+						sevenSet = new Set(inputValues[i].split(''));
+						continue;
+					}
+					else if(inputValues[i].length == segments[8]) {
+						eightSet = new Set(inputValues[i].split(''));
+						continue;
+					}
+				}
+				for (let i=0;i<inputValues.length;i++){
+					if(inputValues[i].length == 6) { //0,6,9
+						if(isSuperset(new Set(inputValues[i].split('')),fourSet)) {
+							nineSet = new Set(inputValues[i].split(''));
+							continue;
+						}				
+						else if(isSuperset(new Set(inputValues[i].split('')),oneSet)) {
+							zeroSet = new Set(inputValues[i].split(''));
+							continue;
+						}			
+						else {
+							sixSet = new Set(inputValues[i].split(''));
+							continue;
+						}
+					}
+				}
+				for (let i=0;i<inputValues.length;i++){
+					if(inputValues[i].length == 5) { //2,3,5
+						if(isSuperset(new Set(inputValues[i].split('')),oneSet)) {
+							threeSet = new Set(inputValues[i].split(''));
+							continue;
+						}				
+						else if(isSuperset(sixSet,new Set(inputValues[i].split('')))) {
+							fiveSet = new Set(inputValues[i].split(''));
+							continue;
+						}			
+						else {
+							twoSet = new Set(inputValues[i].split(''));
+							continue;
+						}
+					}
+				}
+//				console.log('end of input')
+
+				display[0] = difference(sevenSet,oneSet).values().next().value;
+				display[1] = difference(nineSet,threeSet).values().next().value;
+				display[2] = difference(eightSet,sixSet).values().next().value;
+				display[3] = difference(eightSet,zeroSet).values().next().value;
+				display[4] = difference(sixSet,fiveSet).values().next().value;
+				display[5] = difference(oneSet,new Set(display[2])).values().next().value;
+				display[6] = difference(difference(threeSet,sevenSet),new Set(display[3])).values().next().value;
+				
+//				showDisplay(display)
+
+				let outputValues = notes[1].trim().split(' ');
+
+				for (let i=0;i<outputValues.length;i++){
+					if(outputValues[i].length == segments[1]) {
+						outputNumber[i] = 1;
+						continue;
+					}
+					else if(outputValues[i].length == segments[4]) {
+						outputNumber[i] = 4;
+						continue;
+					}
+					else if(outputValues[i].length == segments[7]) {
+						outputNumber[i] = 7;
+						continue;
+					}
+					else if(outputValues[i].length == segments[8]) {
+						outputNumber[i] = 8;
+						continue;
+					}
+					else if(outputValues[i].length == 6) { //0,6,9
+						if(0 == difference(new Set(outputValues[i]),zeroSet).size) {
+							outputNumber[i] = 0;
+							continue;
+						}
+						else if(0 == difference(new Set(outputValues[i]),sixSet).size) {
+							outputNumber[i] = 6;
+							continue;
+						}
+						else if(0 == difference(new Set(outputValues[i]),nineSet).size) {
+							outputNumber[i] = 9;
+							continue;
+						}
+					}
+					else if(outputValues[i].length == 5) { //2,3,5
+						if(0 == difference(new Set(outputValues[i]),twoSet).size) {
+							outputNumber[i] = 2;
+							continue;
+						}
+						else if(0 == difference(new Set(outputValues[i]),threeSet).size) {
+							outputNumber[i] = 3;
+							continue;
+						}
+						else if(0 == difference(new Set(outputValues[i]),fiveSet).size) {
+							outputNumber[i] = 5;
+							continue;
+						}
+					}
+				}
+//				console.log((outputNumber[0] * 1000) + (outputNumber[1] * 100) + (outputNumber[2] * 10) + outputNumber[3])
+				result += (outputNumber[0] * 1000) + (outputNumber[1] * 100) + (outputNumber[2] * 10) + outputNumber[3];
+//				console.log('end of entry')
+			}
+		});
+	
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	
+	<div>
+		<span class="blank"></span><span class="a"></span><span class="a"></span><span class="a"></span><span class="a"></span><span class="blank"></span>
+	</div>
+	<div>
+		<span class="b"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="c"></span>
+	</div>
+	<div>
+		<span class="b"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="c"></span>
+	</div>
+	<div>
+		<span class="blank"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="d"></span><span class="blank"></span>
+	</div>
+	<div>
+		<span class="e"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="f"></span>
+	</div>
+	<div>
+		<span class="e"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span class="f"></span>
+	</div>
+	<div>
+		<span class="blank"></span><span class="g"></span><span class="g"></span><span class="g"></span><span class="g"></span><span class="blank"></span>
+	</div>
+</body>
+</html>
