@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+
+const maxLength = 999;
+
+String.prototype.minIndex = function (bracket) {
+	return this.indexOf(bracket) < 0 ? maxLength : this.indexOf(bracket)
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				let newline = line;
+				let lastLinelength = newline.length + 1;
+				do {
+					lastLinelength = newline.length;
+					newline = newline.replaceAll('()','');
+					newline = newline.replaceAll('[]','');
+					newline = newline.replaceAll('{}','');
+					newline = newline.replaceAll('<>','');
+				}
+				while (newline.length < lastLinelength || 0 == newline.length);
+					
+				let closingCharIndex = Math.min(newline.minIndex(')'),newline.minIndex(']'),newline.minIndex('}'),newline.minIndex('>'))
+				if(closingCharIndex > 0 && closingCharIndex < maxLength) {
+
+					illegalChar = newline.substring(closingCharIndex,closingCharIndex + 1)
+					
+					switch(illegalChar) {
+						case (')'):
+							result += 3
+							break
+						case (']'):
+							result += 57
+							break
+						case ('}'):
+							result += 1197
+							break
+						case ('>'):
+							result += 25137
+							break
+					}
+				}
+			}		
+		});
+
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
