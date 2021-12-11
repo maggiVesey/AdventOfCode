@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+var flashCount = 0;
+const octopusses = []
+
+function increaseEnergyAndCheckFlash(a,b) {
+	if(octopusses[a][b] >= 0) {
+		octopusses[a][b]++
+	}
+}
+function checkFlash(x,y) {
+	
+	if(9 < octopusses[x][y] && octopusses[x][y] >= 0) {
+		if(x > 0) {
+			if(y > 0) {
+				increaseEnergyAndCheckFlash(x-1,y-1)
+			}
+			increaseEnergyAndCheckFlash(x-1,y)
+			if(y < octopusses[x].length) {
+				increaseEnergyAndCheckFlash(x-1,y+1)
+			}
+		}
+		if(y > 0) {
+			increaseEnergyAndCheckFlash(x,y-1)
+		}
+		if(y < octopusses[x].length) {
+			increaseEnergyAndCheckFlash(x,y+1)
+		}
+		if(x < octopusses.length - 1) {
+			if(y > 0) {
+				increaseEnergyAndCheckFlash(x+1,y-1)
+			}
+			increaseEnergyAndCheckFlash(x+1,y)
+			if(y < octopusses[x].length) {
+				increaseEnergyAndCheckFlash(x+1,y+1)
+			}
+		}
+		octopusses[x][y] = -1
+		flashCount++
+	}
+}
+function step() {
+	for(let i=0 ;i< octopusses.length; i++) {
+		for(let j=0 ;j< octopusses[i].length; j++) {
+			octopusses[i][j]++
+		}
+	}
+	do {
+		lastResult = flashCount;
+		for(let i=0 ;i< octopusses.length; i++) {
+			for(let j=0 ;j< octopusses[i].length; j++) {
+				checkFlash(i,j)
+			}
+		}
+	}
+	while(flashCount > lastResult);
+	
+	let allFlashed = true;
+ 	for(let i=0 ;i< octopusses.length; i++) {
+		for(let j=0 ;j< octopusses[i].length; j++) {
+			if(-1 == octopusses[i][j]) {
+				octopusses[i][j] = 0
+			}
+			else {
+				allFlashed = false;
+			}
+		}
+	} 
+ 	return allFlashed;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				octopusses.push(line.split(''))
+			}		
+		});
+		let complete = false;
+		do {
+			complete = step()
+			result++
+		}
+		while (!complete);
+			
+		console.log(octopusses)
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
