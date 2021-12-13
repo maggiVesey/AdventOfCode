@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+function FoldInstruction(direction,distance) {
+	this.direction = direction;
+	this.distance = distance;
+}
+function Coord(x,y) {
+	this.x = x;
+	this.y = y;
+}
+const foldInstructions = []
+const coords = []
+var maxX = 0;
+var maxY = 0;
+
+function maxDimension(coord) {
+	if(coord.x > maxX) {
+		maxX = coord.x;
+	}
+	if(coord.y > maxY) {
+		maxY = coord.y;
+	}
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(line.startsWith('fold along')) {
+				let foldInstruction = line.split(' ');
+				let fold = foldInstruction[2].split('=')
+				foldInstructions.push(new FoldInstruction(fold[0],parseInt(fold[1],10)))
+			}
+			else{
+				if(''!=line) {
+					let coordinates = line.split(',');
+					let coord = new Coord(parseInt(coordinates[1],10),parseInt(coordinates[0],10))
+					coords.push(coord)
+					maxDimension(coord)
+				}		
+			}
+		});
+
+		let dots = Array.from(Array(maxX+1), () => Array(maxY+1).fill('.'))
+
+		for(let i=0;i< coords.length;i++) {
+			dots[coords[i].x][coords[i].y] = '#'
+		}
+//		for(let i=0;i< foldInstructions.length;i++) {
+		for(let i=0;i< 1;i++) {
+			let offset = 0
+			if('y' == foldInstructions[i].direction) {
+				for(let j=foldInstructions[i].distance + 1;j<dots.length;j++) {
+					offset++
+					for (let k=0;k<dots[j].length;k++) {
+						if('#' == dots[j][k]) {
+							dots[foldInstructions[i].distance - offset][k] = '#'
+						}
+					}
+				}
+				dots = dots.slice(0,foldInstructions[i].distance)
+			}
+ 			if('x' == foldInstructions[i].direction) {
+				for(let j=foldInstructions[i].distance + 1;j<dots[0].length;j++) {
+					offset++
+					for (let k=0;k<dots.length;k++) {
+						if('#' == dots[k][j]) {
+							dots[k][foldInstructions[i].distance - offset] = '#'
+						}
+					}
+				}
+				dots = dots.map(c => c.slice(0,foldInstructions[i].distance))
+			}
+		}
+		console.log(dots)
+		result = dots.flat().reduce((totalDots,a) => {
+			'#' == a ? totalDots++ : totalDots
+//			console.log(a,'#' == a,totalDots)
+			return totalDots
+		},0)
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
