@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+var polymerTemplate = [];
+const pairInsertionRules = new Map()
+
+var letterCount = {}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if('' != line) {
+				let pairInsertionRule = line.split(' -> ');
+				if(pairInsertionRule.length > 1) {
+					pairInsertionRules.set(pairInsertionRule[0],pairInsertionRule[1])
+				}
+				else {
+					polymerTemplate = line.split('');
+				}
+			}			
+		});
+		console.log(polymerTemplate)
+		
+		let pairs = polymerTemplate.map((element, index, array) => element + array[index+1]).slice(0, -1)
+		
+		for(let x=0; x<10;x++)  {
+			let newPairs = []
+			for(let i=0;i<pairs.length;i++) {
+				let insertRule = pairInsertionRules.get(pairs[i])
+				newPairs.push(pairs[i].substring(0,1)+insertRule)
+				newPairs.push(insertRule+pairs[i].substring(1))
+			}
+			pairs = newPairs
+		}
+
+		console.log(pairs)
+		pairs.reduce(function (letterCount, pair) {
+			let firstLetter = pair.substring(0,1)
+			let secondLetter = pair.substring(1)
+			letterCount[firstLetter] ? ++letterCount[firstLetter] : letterCount[firstLetter] = 1, letterCount
+			letterCount[secondLetter] ? ++letterCount[secondLetter] : letterCount[secondLetter] = 1, letterCount
+			return letterCount
+		}, letterCount);
+
+		console.log(letterCount)
+
+		let sortedLetterCount = Object.entries(letterCount).sort((a, b) => a[1] - b[1]);
+		console.log(sortedLetterCount)
+		
+		result = Math.ceil(sortedLetterCount[sortedLetterCount.length-1][1] / 2) - Math.ceil(sortedLetterCount[0][1] / 2)
+		
+		
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>

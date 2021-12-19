@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+var polymerTemplate = [];
+const pairInsertionRules = new Map()
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if('' != line) {
+				let pairInsertionRule = line.split(' -> ');
+				if(pairInsertionRule.length > 1) {
+					pairInsertionRules.set(pairInsertionRule[0],pairInsertionRule[1])
+				}
+				else {
+					polymerTemplate = line.split('');				}
+			}			
+		});
+		console.log(polymerTemplate)
+		for(let x=0; x<10;x++)  {
+			let newPolymerTemplate = [...polymerTemplate]
+			for(let i=1;i<polymerTemplate.length;i++) {
+				let pair = polymerTemplate[i-1] + polymerTemplate[i]
+				let insertRule = pairInsertionRules.get(pair)
+				newPolymerTemplate.splice(i*2-1,0,insertRule)
+			}
+			polymerTemplate = newPolymerTemplate;
+		}
+		console.log(polymerTemplate.length)
+		console.log(polymerTemplate)
+		
+		const occurrences = polymerTemplate.reduce((elementCount, element) => {
+			return elementCount[element] ? ++elementCount[element] : elementCount[element] = 1, elementCount
+		}, {});
+		console.log(occurrences)
+		let sortedOccurrences = Object.entries(occurrences).sort((a, b) => a[1] - b[1]);
+		console.log(sortedOccurrences)
+		
+		result = sortedOccurrences[sortedOccurrences.length-1][1] - sortedOccurrences[0][1]
+			
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
