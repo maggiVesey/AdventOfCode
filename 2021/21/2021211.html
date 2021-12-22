@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+var playerPos = {}
+var playerScore = {}
+var dieRolls = 0;
+
+var diceValue = 1;
+function diceRoll() {
+	let diceRoll = 0;
+	for (let i=0;i<3;i++) {
+		diceRoll += diceValue++
+		if(101 == diceValue) {
+			diceValue = 1;
+		}
+		dieRolls++
+	}
+	return diceRoll;
+}
+function movePlayer(i) {
+	playerPos[i] += diceRoll();
+	if(playerPos[i] > 10) {
+		playerPos[i] = playerPos[i] % 10;
+	}
+	playerScore[i] += (0 == playerPos[i]) ? 10 : playerPos[i]
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			let a = line.split(/Player /)
+			let b = a[1].split(' ')
+			playerPos[parseInt(b[0],10)] = parseInt(b[3],10)
+			playerScore[parseInt(b[0],10)] = 0
+		});
+
+		do {
+			movePlayer(1)
+			if(playerScore[1] < 1000) {
+				movePlayer(2)
+			}
+		} while (playerScore[1] < 1000 && playerScore[2] < 1000)
+			
+		result = dieRolls * ((playerScore[1] < playerScore[2]) ? playerScore[1] : playerScore[2])
+			
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
