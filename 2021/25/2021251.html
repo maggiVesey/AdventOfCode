@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+const seaBed = []
+function cloneArray(oldArray) {
+	let newArray = oldArray.map(function(arr) {
+		   return arr.slice();
+		});
+	return newArray;
+}
+
+function movedEast() {
+	let moved = false;
+	for(let i=0;i<seaBed.length;i++) {
+		let j0 = seaBed[i][0]
+		for(let j=0;j<seaBed[i].length;j++) {
+			if('>' == seaBed[i][j]) {
+				let lastj = (j == seaBed[i].length - 1)
+				let space = ('.' == (lastj ? j0  : seaBed[i][j+1]))
+				if(space) {
+					seaBed[i][j] = '.'
+					seaBed[i][(lastj ? 0  : j+1)] = '>'
+					j++ // only move once
+					moved = true
+				}
+			}
+		}
+	}
+	return moved;
+}
+function movedSouth() {
+	let moved = false;
+	for(let j=0;j<seaBed[0].length;j++) {
+		let i0 = seaBed[0][j]
+		for(let i=0;i<seaBed.length;i++) {
+			if('v' == seaBed[i][j]) {
+				let lasti = (i == seaBed.length - 1)
+				let space = ('.' == (lasti ? i0  : seaBed[i+1][j]))
+				if(space) {
+					seaBed[i][j] = '.'
+					seaBed[(lasti ? 0  : i+1)][j] = 'v'
+					i++ // only move once
+					moved = true
+				}
+			}
+		}
+	}
+	return moved;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				seaBed.push(line.split(''))
+			}		
+		});
+		
+		let oldseabed = cloneArray(seaBed)
+		console.log(oldseabed)
+
+		let moved = false;
+		do {
+			let movedE = movedEast()
+			let movedS = movedSouth()
+			moved = (movedE || movedS) 
+			result++
+		} while(moved)
+
+		console.log(seaBed)
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
