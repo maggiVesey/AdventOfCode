@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+var heightlines = []
+var basinSizes = []
+var basinSize = 0;
+
+function addPointsToBasin(x,y) {
+	
+	if(x < 0 || y < 0 || x >= heightlines.length || y >= heightlines[x].length) {
+		return;
+	}
+//	console.log(x,y,heightlines[x][y])
+	if(0 > heightlines[x][y] || 9 == heightlines[x][y]) {
+		return;
+	}
+	heightlines[x][y] = -1
+	basinSize++
+	
+	addPointsToBasin(x-1,y)
+	addPointsToBasin(x+1,y)
+	addPointsToBasin(x,y-1)
+	addPointsToBasin(x,y+1)
+	return basinSize;
+}
+function getBasinSize(x,y){
+	
+	basinSize = 0;
+	addPointsToBasin(x,y)
+	return basinSize
+}
+
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if(''!=line) {
+				heightlines.push(line.split('').map(Number));
+			}
+		});
+
+		console.log(heightlines)
+		
+		for(let i=0;i<heightlines.length;i++) {
+			for(let j=0;j<heightlines[i].length;j++) {
+				if(-1 != heightlines[i][j]) {
+					if(heightlines[i][j] < ((i>0) ? heightlines[i-1][j] : 9) && 
+					   heightlines[i][j] < ((i+1 < heightlines.length) ? heightlines[i+1][j] : 9) &&
+					   heightlines[i][j] < ((j>0) ? heightlines[i][j-1] : 9) && 
+					   heightlines[i][j] < ((j+1 <heightlines[i].length) ? heightlines[i][j+1] : 9)) {
+						
+						basinSizes.push(getBasinSize(i,j));
+					}
+				}
+			}
+		}
+		basinSizes.sort((a,b) => b - a);
+		console.log('top 3',basinSizes[0],basinSizes[1],basinSizes[2])
+		
+		result = basinSizes[0] * basinSizes[1] * basinSizes[2]
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
