@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+var riskLevels = [];
+const originalRiskLevels = [];
+const nodeSet = new Set();
+
+function updatePathRisk(from, to) {
+    let newRisk = from.pathRisk + to.risk;
+    if (newRisk < to.pathRisk) {
+        to.pathRisk = newRisk;
+        to.prev = from;
+    }
+}
+function nextInQueue() {
+    let next = null;
+    for (const node of nodeSet) {
+        if (next === null || (node.pathRisk < next.pathRisk)) {
+            next = node;
+        }
+    }
+    return next;
+}
+function lowestRisk() {
+	let start = riskLevels[0][0]
+	start.pathRisk = 0;
+
+	let end = riskLevels[riskLevels.length - 1][riskLevels[riskLevels.length - 1].length - 1]
+	
+	nodeSet.add(start);
+	
+	while (nodeSet.size > 0) {
+	    if (end.visited) {
+	        break;
+	    }
+
+	    let current = nextInQueue();
+
+	    if (current.visited) {
+		    nodeSet.delete(current);
+	        continue;
+	    }
+
+	    if (current.up) {
+	        updatePathRisk(current, current.up);
+	        nodeSet.add(current.up);
+	    }
+	    if (current.down) {
+	        updatePathRisk(current, current.down);
+	        nodeSet.add(current.down);
+	    }
+	    if (current.right) {
+	        updatePathRisk(current, current.right);
+	        nodeSet.add(current.right);
+	    }
+	    if (current.left) {
+	        updatePathRisk(current, current.left);
+	        nodeSet.add(current.left);
+	    }
+
+	    current.visited = true;
+	    nodeSet.delete(current);
+	}
+	
+	return end.pathRisk;
+}
+function multiplyRisks() {
+	riskLevels = new Array(originalRiskLevels.length * 5);  
+	 
+	for(let i = 0; i < riskLevels.length; i++) { 
+		riskLevels[i] = new Array(originalRiskLevels[0].length * 5);  
+	} 
+	for(let x=0;x<5;x++){
+		for (let i=0;i<originalRiskLevels.length;i++) {
+		    for (let j=0;j<originalRiskLevels[i].length;j++) {
+		    	
+		    	let newRiskNodeValue = originalRiskLevels[i][j].risk;
+		    	newRiskNodeValue = newRiskNodeValue + (x*1)
+		    	newRiskNodeValue = newRiskNodeValue > 9 ? newRiskNodeValue - 9 : newRiskNodeValue
+		    	
+		    	riskLevels[i][j + x * originalRiskLevels.length] = {
+						id: null,
+			        	risk: newRiskNodeValue,
+			            pathRisk: Infinity,
+			            visited: false,
+			            up: null,
+			            down: null,
+			            left: null,
+			            right: null,
+			            prev: null
+			        };
+		    }
+		}
+	}
+	 	
+	for(let x=1;x<5;x++){
+		for (let i=0;i<originalRiskLevels.length;i++) {
+		    for (let j=0;j<riskLevels[i].length;j++) {
+
+		    	let newRiskNodeValue = riskLevels[i][j].risk;
+		    	newRiskNodeValue = newRiskNodeValue + (x*1)
+		    	newRiskNodeValue = newRiskNodeValue > 9 ? newRiskNodeValue - 9 : newRiskNodeValue
+		    	
+		    	riskLevels[i + x * originalRiskLevels.length][j] = {
+						id: null,
+			        	risk: newRiskNodeValue,
+			            pathRisk: Infinity,
+			            visited: false,
+			            up: null,
+			            down: null,
+			            left: null,
+			            right: null,
+			            prev: null
+			        };
+		    }
+		}
+	} 
+}
+
+function addNeighboursAndId () {
+	for (let i=0;i<riskLevels.length;i++) {
+	    for (let j=0;j<riskLevels[i].length;j++) {
+	    	
+	        const node = riskLevels[i][j];
+	        
+	        node.id		= i * ((i > 0) ? riskLevels[i-1].length : 0) + j;
+	        node.up		= (i > 0) ? riskLevels[i - 1][j] : null;
+	        node.right	= (j < riskLevels[i].length - 1) ? riskLevels[i][j + 1] : null;
+	        node.down	= (i < riskLevels.length - 1) ? riskLevels[i + 1][j] : null;
+	        node.left	= (j > 0) ? riskLevels[i][j - 1] : null;
+	    }
+	}
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			if('' != line) {
+				originalRiskLevels.push(line.split('').map(riskLevel => ({
+					id: null,
+		        	risk: parseInt(riskLevel,10),
+		            pathRisk: Infinity,
+		            visited: false,
+		            up: null,
+		            down: null,
+		            left: null,
+		            right: null,
+		            prev: null
+		        })));
+			}
+		});
+
+		multiplyRisks();
+		addNeighboursAndId();
+        result = lowestRisk();
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
