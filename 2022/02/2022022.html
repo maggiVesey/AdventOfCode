@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function rockPaperScissors(round) {
+	switch(round) {
+		case 'A X': return 0 + 3;
+		case 'A Y': return 3 + 1;
+		case 'A Z': return 6 + 2;
+		case 'B X': return 0 + 1;
+		case 'B Y': return 3 + 2;
+		case 'B Z': return 6 + 3;
+		case 'C X': return 0 + 2;
+		case 'C Y': return 3 + 3;
+		case 'C Z': return 6 + 1;
+		default: return 0;
+	}
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const rounds = file
+		.replace(/\r/g, "") 
+		.trim() // 
+		.split(/\n/); 
+	
+		console.log('rounds',rounds);
+		let result = rounds.reduce((previous, current) => previous + rockPaperScissors(current), 0);
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
