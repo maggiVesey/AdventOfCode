@@ -31,7 +31,6 @@ function aocFunction(input) {
 		.trim() // 
 		.split(/\n/); 
 	
-		console.log('rounds',rounds);
 		let result = rounds.reduce((previous, current) => previous + rockPaperScissors(current), 0);
 		
 		document.getElementById('result').value = result;
