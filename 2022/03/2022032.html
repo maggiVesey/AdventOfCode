@@ -17,7 +17,7 @@ function aocFunction(input) {
 			.split(/\n/); 
 		
 		let result = 0;
-		let group = new Array();
+		let group = [];
 		
 		rucksacks.forEach(rucksack => {
 			group.push(rucksack);
@@ -28,7 +28,7 @@ function aocFunction(input) {
 						break;
 					}
 				}
-				group = new Array();
+				group = [];
 			}
 		})
 

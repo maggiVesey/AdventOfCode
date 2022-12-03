@@ -28,7 +28,7 @@ function aocFunction(input) {
 			.split(/\n/); 
 		
 		let result = rucksacks.map(rucksack => {
-			let compartments = new Array();
+			let compartments = [];
 			compartments.push(rucksack.slice(0,rucksack.length/2));
 			compartments.push(rucksack.slice(rucksack.length/2,rucksack.length));
 			return compartments;
