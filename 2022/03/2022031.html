@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function commonCharacterPriority(compartment1,compartment2) {
+	let common = '';
+	for(const letter of compartment1) {
+		if(compartment2.includes(letter)) {
+			common = letter;
+			break;
+		}
+	}
+	let priorityCharCode =  common != ''? common.charCodeAt(0) : 0;
+	return priorityCharCode > 96 ? priorityCharCode - 96 : priorityCharCode - 38;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const rucksacks = file
+			.replace(/\r/g, '') 
+			.trim() // 
+			.split(/\n/); 
+		
+		let result = rucksacks.map(rucksack => {
+			let compartments = new Array();
+			compartments.push(rucksack.slice(0,rucksack.length/2));
+			compartments.push(rucksack.slice(rucksack.length/2,rucksack.length));
+			return compartments;
+		}).reduce((previous, current) => previous + commonCharacterPriority(current[0],current[1]), 0);
+
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
