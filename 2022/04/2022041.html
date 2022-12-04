@@ -20,15 +20,10 @@ function aocFunction(input) {
 		assignments.forEach(assignment => {
 			let sections = assignment.split(',');
 			
-			let firstRange = sections[0].split('-');
-			let secondRange =  sections[1].split('-');
+			let firstRange = sections[0].split('-').map(Number);
+			let secondRange =  sections[1].split('-').map(Number);
 			
-			let start1 = parseInt(firstRange[0],10);
-			let end1   = parseInt(firstRange[1],10);
-			let start2 = parseInt(secondRange[0],10);
-			let end2   = parseInt(secondRange[1],10);
-			
-			if((start1 <= start2 && end1 >= end2) || (start2 <= start1 && end2 >= end1)) {
+			if((firstRange[0] <= secondRange[0] && firstRange[1] >= secondRange[1]) || (secondRange[0] <= firstRange[0] && secondRange[1] >= firstRange[1])) {
 				result++;
 			}
 		})
