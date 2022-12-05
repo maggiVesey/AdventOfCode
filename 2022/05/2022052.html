@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const [stacksData,instructions] = file
+			.replace(/\r/g, '') 
+			.split(/\n\n/); 
+		
+		let stacksFromGround = stacksData.split(/\n/).reverse();
+		let numberOfStacks = 0;
+		let firstLine = true;
+		let stack = [];
+		let result = '';
+		
+		stacksFromGround.forEach(line => {
+			if(firstLine) {
+				numberOfStacks = line.trim().split(/\s+/).length;
+				for(let i=1;i<=numberOfStacks;i++) {
+					stack[i] = [];
+				}
+				firstLine = false;
+			}
+			else {
+				for(let i=1;i<=numberOfStacks;i++) {
+					let thisCrate = line.substring((i-1)*4,((i-1)*4)+3);
+					if(thisCrate.trim() != '') {
+						stack[i].push(thisCrate.substring(1,2));
+					}
+				}
+			}
+		});
+		
+		instructions.split(/\n/).forEach(instruction => {
+			 const match = instruction.match(/move (\d+) from (\d+) to (\d+)/);
+			 
+			 let numberOfCrates = parseInt(match[1],10);
+			 let fromStack = parseInt(match[2],10);
+			 let toStack = parseInt(match[3],10);
+			 
+			 let crates = stack[fromStack].splice(-1 * numberOfCrates);
+			 for(let i=0;i<crates.length;i++) {
+				 stack[toStack].push(crates[i]);
+			 }
+		})
+		for(let i=1;i<=numberOfStacks;i++) {
+			result += stack[i].pop()
+		}
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
