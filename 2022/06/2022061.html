@@ -19,7 +19,7 @@ function aocFunction(input) {
 		
 		signals.forEach(signal => {
 			let firstMarkerPosition = 0;
-			for(let i=5;i<signal.length;i++) {
+			for(let i=4;i<signal.length;i++) {
 				let startOfPacket = signal.substring(i - 4,i);
 				console.log(i,startOfPacket)
 				if(new Set(Array.from(startOfPacket)).size == 4) {
