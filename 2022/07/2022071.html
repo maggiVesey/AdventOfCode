@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let directories = new Map();
+
+function addSizeToDirectory(directory,size) {
+	if(directory != '') {
+		let parentDirectory = directories.get(directory);
+		parentDirectory.size += size
+		addSizeToDirectory(parentDirectory.parent,size)
+	}
+	return;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const terminalOutput = file
+			.replace(/\r/g, '') 
+			.split(/\n/); 
+		
+		let result = 0;
+		let currentDirectory = ''
+		
+		terminalOutput.forEach(terminalLine => {
+			if(terminalLine.startsWith('$ cd ')) {
+				if(terminalLine.substring(5) == '/') {
+					currentDirectory = '/'
+					if(undefined == directories.get(currentDirectory)) {
+						let thisFile = {
+								parent : '',
+								children : [],
+								name : '/',
+								size : 0
+						}
+						directories.set(currentDirectory, thisFile)	
+					}
+				}
+				else if(terminalLine.substring(5) == '..') {
+					let thisDirectory = directories.get(currentDirectory)
+					currentDirectory = thisDirectory.parent;
+				}
+				else {
+					currentDirectory = currentDirectory + terminalLine.substring(5) + '/';
+				}
+			}
+			else if(terminalLine.startsWith('$ ls')) {
+				// ignore this
+			}	
+			else if(terminalLine.startsWith('dir ')) {
+				let thisDirectory = currentDirectory + terminalLine.substring(4) + '/';
+				if(undefined == directories.get(thisDirectory)) {
+					let thisFile = {
+							parent : currentDirectory,
+							children : [],
+							name : terminalLine.substring(4),
+							size : 0
+					}
+					directories.set(thisDirectory, thisFile)	
+				}
+			}
+			else {
+				let thisFile = {
+					parent : currentDirectory,
+					children : [],
+					name : terminalLine.split(' ')[1],
+					size : parseInt(terminalLine.split(' ')[0],10)
+				}
+				let thisDirectory = directories.get(currentDirectory);
+				thisDirectory.children.push(thisFile)
+			}
+		})
+		
+		directories.forEach(directory => {
+			directory.size = directory.children.reduce((p,n) => p + n.size,0);
+			addSizeToDirectory(directory.parent,directory.size);
+		});
+		console.log(directories);
+		
+		directories.forEach(directory => {
+			if(directory.size <= 100000) {
+				result += directory.size;
+			}
+		}
+		);
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
