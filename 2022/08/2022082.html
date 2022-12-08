@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const patch = file
+		.replace(/\r/g, "") 
+		.split(/\n/); 
+
+		let i = -1;
+		let trees =  [];
+		
+		patch.forEach(treeRow => {
+			trees[++i] = treeRow.split('').map(Number);
+		});
+		for(let x = 1;x < trees[i].length;x++) {
+			for (let y = 1; y < i ;y++) {
+				let visUp = 0;
+				let visDown = 0;
+				let visLeft = 0;
+				let visRight = 0;
+				for (let z = x - 1;z >= 0;z--) {
+					visUp++;
+					if(trees[z][y] >= trees[x][y]) {
+						break;
+					}
+				}
+				for (let z = x + 1;z <= i;z++) {
+					visDown++;
+					if(trees[z][y] >= trees[x][y]) {
+						break;
+					}
+				}
+				for (let z = y - 1;z >= 0;z--) {
+					visLeft++;
+					if(trees[x][z] >= trees[x][y]) {
+;						break;
+					}
+				}
+				for (let z = y + 1;z < trees[x].length;z++) {
+					visRight++;
+					if(trees[x][z] >= trees[x][y]) {
+						break;
+					}
+				}
+				if(visUp * visDown * visLeft * visRight > result) {
+					result = visUp * visDown * visLeft * visRight;
+				}
+			}
+		}
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
