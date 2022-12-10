@@ -25,11 +25,9 @@ function aocFunction(input) {
 		.split(/\n/); 
 
 		instructions.forEach(instruction => {
-			if('noop' == instruction) {
+			cycles += 1;
+			if(instruction.startsWith('addx')) {
 				cycles += 1;
-			}
-			else { // addx
-				cycles += 2;
 				let lastState = states[states.length - 1];
 
 				let newState = {};
