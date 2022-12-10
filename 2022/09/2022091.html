@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let TailPositions = [];
+
+function getTailPos(HPos,TPos) {
+	let xDiff = HPos.x - TPos.x;
+	let yDiff = HPos.y - TPos.y;
+	
+	if(Math.abs(xDiff) <= 1 && Math.abs(yDiff) <= 1) {
+		//do nothing - diagonal, touching or overlapping
+	}
+	else if(xDiff == 0 && Math.abs(yDiff) == 2) {
+		TPos.y += 1 * (yDiff/Math.abs(yDiff));
+	}
+	else if(Math.abs(xDiff) == 2 && yDiff == 0) {
+		TPos.x += 1 * (xDiff/Math.abs(xDiff));
+	}
+	else {
+		TPos.x += 1 * (xDiff/Math.abs(xDiff));
+		TPos.y += 1 * (yDiff/Math.abs(yDiff));
+	}
+	let newTPos = {};
+	newTPos.x = TPos.x;
+	newTPos.y = TPos.y;
+	
+	TailPositions.push(newTPos)
+	return TPos;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const headMoves = file
+		.replace(/\r/g, "") 
+		.split(/\n/); 
+
+		let HPos = {x: 0, y: 0};
+		let TPos = {x: 0, y: 0};
+		let newTPos = {};
+		newTPos.x = TPos.x;
+		newTPos.y = TPos.y;
+		TailPositions.push(newTPos);
+		
+		headMoves.forEach(headMove => {
+			let move = headMove.split(' ');
+			let direction = move[0];
+			let steps = parseInt(move[1],10);
+			
+			switch (direction) {
+			  case 'U': 
+				  for(let i=1;i<=steps;i++) {
+					  HPos.y -= 1
+					  TPos = getTailPos(HPos,TPos)
+				  }
+			    break;
+			  case 'D':
+				  for(let i=1;i<=steps;i++) {
+					  HPos.y += 1
+					  TPos = getTailPos(HPos,TPos)
+				  }
+				break;
+			  case 'L':
+				  for(let i=1;i<=steps;i++) {
+					  HPos.x -= 1
+					  TPos = getTailPos(HPos,TPos)
+				  }
+			    break;
+			  case 'R':
+				  for(let i=1;i<=steps;i++) {
+					  HPos.x += 1
+					  TPos = getTailPos(HPos,TPos)
+				  }
+				break;
+			  default:
+			    console.log(`Unexpected direction`);
+			}		
+		})
+		console.log(TailPositions);
+
+		document.getElementById('result').value = new Set(TailPositions.map(position => position.x + 'H' + position.y +'V')).size;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
