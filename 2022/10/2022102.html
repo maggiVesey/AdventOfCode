@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let result = '';
+const displayWidth = 40;
+
+function drawPixel(lastX,cycle) {
+	result += (cycle % displayWidth >= lastX - 1 && cycle % displayWidth <= lastX + 1) ? '#' : '.';
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let states = [];
+	let cycles = 0;
+	
+	let newState = {};
+	newState.x = 1;
+	newState.cycle = cycles;
+	states.push(newState)
+	
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const instructions = file
+		.replace(/\r/g, '') 
+		.split(/\n/); 
+
+		instructions.forEach(instruction => {
+
+			let lastState = states[states.length - 1];
+
+			if('noop' == instruction) {
+				drawPixel(lastState.x,cycles++)
+			}
+			else { // addx
+				drawPixel(lastState.x,cycles++)
+				drawPixel(lastState.x,cycles++)
+
+				let newState = {};
+				newState.x = lastState.x + parseInt(instruction.split(' ')[1],10);
+				newState.cycle = cycles;
+				
+				states.push(newState)
+			}
+		});
+		let lineSplit = new RegExp('.{1,' + displayWidth + '}', 'g')
+		document.getElementById('result').value = result.match(lineSplit).join('\n');
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
