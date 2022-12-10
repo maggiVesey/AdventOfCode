@@ -4,25 +4,19 @@
 <title>Advent of Code</title>
 <script>
 
-let result = '';
 const displayWidth = 40;
+let result = '';
 
-function drawPixel(lastX,cycle) {
-	result += (cycle % displayWidth >= lastX - 1 && cycle % displayWidth <= lastX + 1) ? '#' : '.';
+function drawPixel(x,cycle) {
+	result += (cycle % displayWidth >= x - 1 && cycle % displayWidth <= x + 1) ? '#' : '.';
 }
 function aocFunction(input) {
 
 	const file = input.files[0];
 	const reader = new FileReader();
 
-	let states = [];
-	let cycles = 0;
-	
-	let newState = {};
-	newState.x = 1;
-	newState.cycle = cycles;
-	states.push(newState)
-	
+	let x = 1;	
+	let cycle = 0;
 
 	reader.onload = (event) => {
 		const file = event.target.result;
@@ -31,21 +25,10 @@ function aocFunction(input) {
 		.split(/\n/); 
 
 		instructions.forEach(instruction => {
-
-			let lastState = states[states.length - 1];
-
-			if('noop' == instruction) {
-				drawPixel(lastState.x,cycles++)
-			}
-			else { // addx
-				drawPixel(lastState.x,cycles++)
-				drawPixel(lastState.x,cycles++)
-
-				let newState = {};
-				newState.x = lastState.x + parseInt(instruction.split(' ')[1],10);
-				newState.cycle = cycles;
-				
-				states.push(newState)
+			drawPixel(x,cycle++)
+			if(instruction.startsWith('addx')) {
+				drawPixel(x,cycle++)
+				x += parseInt(instruction.split(' ')[1],10);
 			}
 		});
 		let lineSplit = new RegExp('.{1,' + displayWidth + '}', 'g')
