@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function getWorryLevel(worryLevel,operator,factor) {
+	let thisWorryLevel = 0;
+	if('*' == operator) {
+		thisWorryLevel = worryLevel * factor;
+	}
+	if('+' == operator) {
+		thisWorryLevel = worryLevel + factor;
+	}
+	return thisWorryLevel;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	let worryLevels = [];
+	let operation = [];
+	let divisor = [];
+	let pass = [];
+	let fail = [];
+	let inspections = [];
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const monkeysData = file
+			.replace(/\r/g, '') 
+			.split(/\n\n/); 
+
+		monkeysData.forEach(monkeysDatum => {
+			let monkeyData = monkeysDatum.split(/\n/)
+			let monkeyIndex = parseInt(monkeyData[0].match(/Monkey (\d+):/)[1],10);
+			worryLevels[monkeyIndex] = monkeyData[1].substring('  Starting items: '.length).split(',').map(Number);
+			operation[monkeyIndex] = monkeyData[2].substring('  Operation: new = old '.length);
+			divisor[monkeyIndex] = parseInt(monkeyData[3].substring('  Test: divisible by '.length),10);
+			pass[monkeyIndex] = parseInt(monkeyData[4].substring('    If true: throw to monkey '.length),10);
+			fail[monkeyIndex] = parseInt(monkeyData[5].substring('    If false: throw to monkey '.length),10);
+			inspections[monkeyIndex] = 0;
+		});
+		
+		commonDenominator = divisor.reduce((previous,current) => previous * current, 1)
+		console.log('commonDenominator',commonDenominator)
+		
+		for (let round = 0; round < 10000; round++) { 
+			for(let monkeyIndex = 0; monkeyIndex < monkeysData.length; monkeyIndex++) { 
+				while (typeof (worryLevel = worryLevels[monkeyIndex].shift()) !== "undefined") {
+					inspections[monkeyIndex]++;
+					let factor = operation[monkeyIndex].split(' ');
+					let myWorryLevel = getWorryLevel(worryLevel,factor[0],('old' == factor[1]) ? worryLevel : parseInt(factor[1],10));
+
+					// While myWorryLevel is less than commonDenominator, that's the number to store
+					// If it gets bigger than that, we can discard commonDenominator (and any multiples of it)
+					// because any value of divisor won't affect the remainder we are testing
+					
+					if(0 == myWorryLevel % divisor[monkeyIndex]) {
+						worryLevels[pass[monkeyIndex]].push(myWorryLevel % commonDenominator);
+					}
+					else {
+						worryLevels[fail[monkeyIndex]].push(myWorryLevel % commonDenominator);
+					}
+				}
+			}
+		}
+		inspections.sort((a,b) => b - a);
+		
+		document.getElementById('result').value = inspections[0] * inspections[1];
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
