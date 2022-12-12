@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var start;
+var end;
+
+function shortestPath() {
+
+	let nodeQueue = [];
+	let steps = 0;
+
+	end.pathCost = 0;
+	nodeQueue.push(end);
+	
+	while (nodeQueue.length > 0) {
+	    if (start.visited) {
+	        break;
+	    }
+
+	    let current = nodeQueue[0];
+
+	    if (current.visited) {
+	        nodeQueue.shift();
+	        continue;
+	    }
+
+	    if (current.up) {
+	        if(current.height - current.up.height <= 1) {
+	        	current.up.pathCost = current.pathCost + 1;
+		        nodeQueue.push(current.up);
+	        }
+	    }
+	    if (current.right) {
+	        if(current.height - current.right.height <= 1) {
+	        	current.right.pathCost = current.pathCost + 1;
+	        	nodeQueue.push(current.right);
+	        }
+	    }
+	    if (current.down) {
+	        if(current.height - current.down.height <= 1) {
+	        	current.down.pathCost = current.pathCost + 1;
+	        	nodeQueue.push(current.down);
+	        }
+	    }
+	    if (current.left) {
+	        if(current.height - current.left.height <= 1) {
+	        	current.left.pathCost = current.pathCost + 1;
+	        	nodeQueue.push(current.left);
+	        }
+	    }
+
+	    current.visited = true;
+	    console.log(current.letter,current.pathCost)
+	    nodeQueue.shift();
+	}
+	
+	return start.pathCost;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	let elevations = [];
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const heightMap = file
+			.replace(/\r/g, '') 
+			.split(/\n/); 
+
+		heightMap.forEach((line) => {
+			elevations.push(line.split('').map(elevation => ({
+				letter: elevation,
+	        	height: ('S' == elevation) ? 0 : ('E' == elevation) ? 25 : elevation.charCodeAt(0) - "a".charCodeAt(0),
+	            pathCost: Infinity,
+	            visited: false,
+	            up: null,
+	            down: null,
+	            left: null,
+	            right: null
+	        })));
+		});
+		
+		for (let i=0;i<elevations.length;i++) {
+		    for (let j=0;j<elevations[i].length;j++) {
+		        const elevation = elevations[i][j];
+		        elevation.up    = (i > 0) ? elevations[i - 1][j] : null;
+		        elevation.right = (j < elevations[i].length - 1) ? elevations[i][j + 1] : null;
+		        elevation.down  = (i < elevations.length - 1) ? elevations[i + 1][j] : null;
+		        elevation.left  = (j > 0) ? elevations[i][j - 1] : null;
+		        if('S' == elevation.letter) {
+		        	start = elevation;
+		        }
+		        if('E' == elevation.letter) {
+		        	end = elevation;
+		        }
+		    }
+		}
+
+		console.log(elevations);
+		result = shortestPath();
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
