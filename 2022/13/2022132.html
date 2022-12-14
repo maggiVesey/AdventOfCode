@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function comparePackets(left, right) {
+	if(!Array.isArray(left) && !Array.isArray(right)) {
+		return right - left; // +ve for correct
+	}
+	if(Array.isArray(left) && Array.isArray(right)) {
+		for(let i = 0;i < left.length; i++) {
+			if(right[i] == undefined) {
+				return -1; // -ve for incorrect
+			}
+			let j = comparePackets(left[i],right[i])
+			if(0 != j){
+				return j;
+			}
+		}
+		if(right.length != left.length) {
+			return right.length - left.length;
+		}
+	}
+	if(Array.isArray(left) && !Array.isArray(right)) {
+		let j = comparePackets(left,[right])
+		if(0 != j){
+			return j;
+		}
+	}
+	if(Array.isArray(right) && !Array.isArray(left)) {
+		let j = comparePackets([left],right)
+		if(0 != j){
+			return j;
+		}
+	}
+	return 0;  //continue
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const packetData = file
+			.replace(/\r/g, '') 
+			.split(/\n/);
+		
+		let packets = packetData.filter(packet => packet != '');
+
+		packets.push('[[2]]')
+		packets.push('[[6]]')
+
+		packets.sort((a,b) => comparePackets(JSON.parse(b),JSON.parse(a)))
+		console.log(packets)
+
+		document.getElementById('result').value = (packets.indexOf('[[2]]') + 1) * (packets.indexOf('[[6]]') + 1);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>

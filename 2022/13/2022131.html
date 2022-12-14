@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function comparePackets(left, right) {
+	if(!Array.isArray(left) && !Array.isArray(right)) {
+		return right - left; // +ve for correct
+	}
+	if(Array.isArray(left) && Array.isArray(right)) {
+		for(let i = 0;i < left.length; i++) {
+			if(right[i] == undefined) {
+				return -1; // -ve for incorrect
+			}
+			let j = comparePackets(left[i],right[i])
+			if(0 != j){
+				return j;
+			}
+		}
+		if(right.length != left.length) {
+			return right.length - left.length;
+		}
+	}
+	if(Array.isArray(left) && !Array.isArray(right)) {
+		let j = comparePackets(left,[right])
+		if(0 != j){
+			return j;
+		}
+	}
+	if(Array.isArray(right) && !Array.isArray(left)) {
+		let j = comparePackets([left],right)
+		if(0 != j){
+			return j;
+		}
+	}
+	return 0;  //continue
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const packets = file
+			.replace(/\r/g, '') 
+			.split(/\n\n/)
+			.map(pair => pair.split(/\n/).map(JSON.parse));
+		
+		for (let i=0;i<packets.length;i++) {
+			let left = packets[i][0];
+			let right = packets[i][1];
+			packets[i].correctOrder = comparePackets(left,right);
+		}
+		let result = packets.reduce((previous,current,currentIndex) => (current.correctOrder >= 0) ? previous + currentIndex + 1 : previous,0)
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
