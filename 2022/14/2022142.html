@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+const entryPosX = 500;
+const caveRoof = new Set()
+var maxY = 0;
+var maxX = 0;
+var minY = Infinity;
+var minX = Infinity;
+var highestY = 0;
+
+
+function checkCaveDimensions(coord) {
+	if(coord.x > maxX) {
+		maxX = coord.x;
+	}
+	if(coord.x < minX) {
+		minX = coord.x;
+	}
+	if(coord.y > maxY) {
+		maxY = coord.y;
+	}
+	if(coord.y < minY) {
+		minY = coord.y;
+	}
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	let rockRidges = [];
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const rockRidgeData = file
+			.replace(/\r/g, '') 
+			.split(/\n/) 
+
+		rockRidgeData.forEach((ridgeLine) => {
+			let coords = ridgeLine.split(/ -> /)
+				.map((point) => {
+			      const [x, y] = point.split(",").map(Number);
+			      return { x:x, y:y};
+			    });
+			
+			let previousPoint = coords.shift();
+			checkCaveDimensions(previousPoint)
+			caveRoof.add(JSON.stringify(previousPoint))
+			
+			while(coords.length>0) {
+				let currentPoint = coords.shift();
+				checkCaveDimensions(currentPoint)
+				let x = previousPoint.x
+				let y = previousPoint.y
+				let xstep =  (1 * (currentPoint.x < previousPoint.x) ? -1 : 1)
+				let ystep =  (1 * (currentPoint.y < previousPoint.y) ? -1 : 1)
+				while(x != currentPoint.x) {
+					x += xstep
+					caveRoof.add(JSON.stringify({x:x,y:currentPoint.y}))
+				}
+				
+				while(y != currentPoint.y) {
+					y += ystep
+					caveRoof.add(JSON.stringify({x:currentPoint.x,y:y}))
+				}
+				previousPoint = currentPoint
+			}
+		})
+
+		let full = false;
+		maxY = maxY;
+		
+		while (!full) {
+			let stopped = false;
+			sandPosX = entryPosX;
+			sandPosY = highestY;
+			
+			result++
+			while(!stopped) {
+
+				while(!caveRoof.has(JSON.stringify({x:sandPosX,y:sandPosY + 1}))) {
+//					console.log('dropping',{x:sandPosX,y:sandPosY})
+					if(sandPosY > maxY) {
+						stopped = true;
+						break;
+					}
+					sandPosY++
+				}
+				if(!caveRoof.has(JSON.stringify({x:sandPosX,y:sandPosY + 1}))) {
+//					console.log('step down',{x:sandPosX,y:sandPosY})
+				}
+				else if(!caveRoof.has(JSON.stringify({x:sandPosX - 1,y:sandPosY + 1}))) {
+//					console.log('step left',{x:sandPosX - 1,y:sandPosY})
+					sandPosX--;
+				}
+				else if(!caveRoof.has(JSON.stringify({x:sandPosX + 1,y:sandPosY + 1}))) {
+//					console.log('step right',{x:sandPosX + 1,y:sandPosY})
+					sandPosX++;
+				}
+				else {
+					stopped = true;
+				}
+			}
+			if(sandPosX == entryPosX && (highestY == 0 || sandPosY <= highestY)) {
+				highestY = sandPosY - 1; 
+			}
+//			console.log('sandPos',JSON.stringify({x:sandPosX,y:sandPosY}))
+			caveRoof.add(JSON.stringify({x:sandPosX,y:sandPosY}))
+			if(sandPosX == entryPosX && sandPosY == 0) {
+				full = true
+				break
+			}
+		} 
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
