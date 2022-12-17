@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	const targetRow = 2000000;
+	
+	let sensors = new Set();
+	let beacons = new Set();
+	let coverageCoords = new Set();
+	
+	let result = 0;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const sensorReports = file
+			.replace(/\r/g, '') 
+			.split(/\n/) 
+
+		sensorReports.forEach(sensorReport => {
+			 let match = sensorReport.match(/Sensor at x=([-+]?\d+), y=([-+]?\d+): closest beacon is at x=([-+]?\d+), y=([-+]?\d+)/);
+
+			 let sensorCoord = {x:parseInt(match[1],10),y:parseInt(match[2],10)};
+			 let beaconCoord = {x:parseInt(match[3],10),y:parseInt(match[4],10)};
+			 let manhattanDistance = Math.abs(beaconCoord.x - sensorCoord.x) + Math.abs(beaconCoord.y - sensorCoord.y);
+			 
+			 if(sensorCoord.y == targetRow) {
+				 sensors.add(sensorCoord.x)
+				 if(coverageCoords.has(sensorCoord.x)) {
+					 coverageCoords.delete(sensorCoord.x)
+				 }
+			 }
+			 if(beaconCoord.y == targetRow) {
+				 beacons.add(beaconCoord.x)
+				 if(coverageCoords.has(beaconCoord.x)) {
+					 coverageCoords.delete(beaconCoord.x)
+				 }
+			 }
+			 console.log('manhattanDistance',manhattanDistance)
+
+			 if(Math.abs(sensorCoord.y - manhattanDistance) <= targetRow) {
+				 coverageCoords.add(sensorCoord.x)
+				 console.log(manhattanDistance - Math.abs(targetRow - sensorCoord.y))
+				 for(let i = 0; i <= manhattanDistance - Math.abs(targetRow - sensorCoord.y); i++) {
+					 if(!sensors.has(sensorCoord.x - i) && !beacons.has(sensorCoord.x - i)) {
+						 coverageCoords.add(sensorCoord.x - i)
+					 }
+					 if(!sensors.has(sensorCoord.x + i) && !beacons.has(sensorCoord.x + i)) {
+						 coverageCoords.add(sensorCoord.x + i)
+					 }
+				 }
+			 }
+			 console.log(sensorCoord,beaconCoord,manhattanDistance)
+			 console.log(coverageCoords)
+		})
+		document.getElementById('result').value = coverageCoords.size;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
+
+
