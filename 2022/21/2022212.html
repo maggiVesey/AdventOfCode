@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let monkeys = new Map();
+
+function calculateResult(monkeyName) {
+	let monkey = monkeys.get(monkeyName)
+	if(!monkey.hasOwnProperty('operator')) {
+        return monkey.result;
+    }
+    let result1 = calculateResult(monkey.monkey1)
+    let result2 = calculateResult(monkey.monkey2);
+
+    switch(monkey.operator) {
+    case '+':
+    	monkey.result = result1 + result2
+    	break
+    case '-':
+    	monkey.result = result1 - result2
+    	break
+    case '*':
+    	monkey.result = result1 * result2
+    	break
+    case '/':
+    	monkey.result = result1 / result2
+    	break
+    default:
+    	console.log('unrecognised operator')
+    	monkeys.get('root').result = 'unrecognised operator' + monkey.operator
+    }
+    
+    return monkey.result;
+}
+function findPathToMonkey(monkeyName, targetMonkeyName, path) {
+	let monkey = monkeys.get(monkeyName)
+    if (monkey.hasOwnProperty('result')) {
+        if (monkey.name == targetMonkeyName) {
+            return [monkey.name];
+        } else {
+            return [];
+        }
+    }
+    let path1 = findPathToMonkey(monkey.monkey1, targetMonkeyName, path)
+    let path2 = findPathToMonkey(monkey.monkey2, targetMonkeyName, path);
+
+    if (path.length < path1.length || path.length < path2.length) {
+        return [monkey.name, ...path1, ...path2]
+    }
+    return path;
+}
+function getHumanValue(monkeyName, positionInPath, path, target) {
+	let monkey = monkeys.get(monkeyName)
+    if (monkey.name == 'humn') {
+        return target;
+    } 
+    else if (!monkey.hasOwnProperty('operator')) {
+        return monkey.value;
+    }
+
+    let newTarget = 0;
+
+    const nextStep = path[positionInPath + 1];
+    const nextHumnBranch = monkey.monkey1 == nextStep ? monkey.monkey1 : monkey.monkey2;
+    const nextCalcBranch = monkey.monkey1 == nextStep ? monkey.monkey2 : monkey.monkey1;
+
+    const nextCalcValue = calculateResult(nextCalcBranch);
+    console.log(monkey,'nextCalcBranch',nextCalcBranch,'nextCalcValue',nextCalcValue)
+    switch(monkey.operator) {
+    case '+':
+    	newTarget = target - nextCalcValue
+    	break
+    case '-':
+        if (monkey.monkey1 == nextHumnBranch) {
+        	newTarget = target + nextCalcValue;
+        } else {
+        	newTarget = nextCalcValue - target;
+        }
+     	break
+    case '*':
+    	newTarget = target / nextCalcValue
+   	break
+    case '/':
+    	newTarget = target * nextCalcValue
+    	break
+    default:
+    	console.log('unrecognised operator')
+    	monkeys.get(monkeyName).result = 'unrecognised operator' + monkey.operator
+    }
+
+    return getHumanValue(nextHumnBranch, positionInPath + 1, path, newTarget);
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const monkeyInput = file
+			.replace(/\r/g, '') 
+			.split(/\n/) 
+			.map(line => line.split(': '))
+			.forEach((current) => {
+					let monkey = {name: current[0]};
+					if(Number.isInteger(Number(current[1]))) {
+						monkey.result = parseInt(current[1]);
+					}
+					else {
+						let equation = current[1].split(' ');
+						monkey.monkey1 = equation[0];
+						monkey.operator = equation[1]
+						monkey.monkey2 = equation[2];
+					}
+					monkeys.set(monkey.name,monkey)
+				})
+				
+			monkeys.get('root').operator = '='
+			monkeys.get('humn').result = 'x'
+				
+			const pathToHumn = findPathToMonkey('root', 'humn',[]);
+		
+			let nextCalcBranch = monkeys.get('root').monkey1 == pathToHumn[1] ? monkeys.get('root').monkey2 : monkeys.get('root').monkey1
+
+			let targetValue = calculateResult(nextCalcBranch);
+			
+			let nextHumnBranch = monkeys.get('root').monkey1 == pathToHumn[1] ? monkeys.get('root').monkey1 : monkeys.get('root').monkey2
+
+			let humnValue = getHumanValue(nextHumnBranch, 1, pathToHumn, targetValue);
+			
+			monkeys.get('humn').result = humnValue
+			let calculatedHumnValue = calculateResult(nextHumnBranch);
+			console.log('targetValue',targetValue,'calculatedHumnValue',calculatedHumnValue)
+			document.getElementById('result').value = humnValue;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
