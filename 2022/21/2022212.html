@@ -81,9 +81,14 @@ function getHumanValue(monkeyName, positionInPath, path, target) {
      	break
     case '*':
     	newTarget = target / nextCalcValue
+     	break
    	break
     case '/':
-    	newTarget = target * nextCalcValue
+        if (monkey.monkey1 == nextHumnBranch) {
+        	newTarget = target * nextCalcValue;
+        } else {
+        	newTarget = nextCalcValue / target;
+        }
     	break
     default:
     	console.log('unrecognised operator')
