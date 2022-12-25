@@ -7,22 +7,22 @@
 const base = 5;
 
 const convertToSnafu = (decimal) => {
-	let snafu = ''
+	let snafu = '';
 	do {
-		let remainder = decimal % base
+		let remainder = decimal % base;
 		switch(remainder) {
 			case 4:
-				snafu = "-" + snafu
-				decimal += base
-				break
+				snafu = '-' + snafu;
+				decimal += base;
+				break;
 			case 3:
-				snafu = "=" + snafu
-				decimal += base
-				break
+				snafu = '=' + snafu;
+				decimal += base;
+				break;
 			default:
-				snafu = remainder + snafu
+				snafu = remainder + snafu;
 		}
-		decimal = (decimal - remainder) / base
+		decimal = (decimal - remainder) / base;
 	} while (decimal > 0)
 
 	return snafu;
@@ -42,19 +42,19 @@ function aocFunction(input) {
 				let number = 0;
 				switch(digit) {
 				case '=':
-					number = -2
-					break
+					number = -2;
+					break;
 				case '-':
-					number = -1
-					break
+					number = -1;
+					break;
 				default:
-					number = parseInt(digit,10)
+					number = parseInt(digit,10);
 				}
 				return base ** i * number
 			}).reduce((acc,current) => acc + current,0)
 			).reduce((acc,current) => acc + current,0)
 
-			console.log(fuelRequirements)
+			console.log(fuelRequirements);
 			
 			document.getElementById('result').value = convertToSnafu(fuelRequirements);
 	};
