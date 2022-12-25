@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let groves = []
+let proposals = []
+
+let expand = false;
+
+const expandArray = (arr,symbol) =>
+	[	arr[0].map(_ => symbol),
+		...arr,
+		arr[0].map(_ => symbol),
+	].map(row => [symbol, ...row, symbol]);
+
+const expandIfNeeded = () => {
+	if(expand) {
+		for(let i=0;i<4;i++) {
+	    	groves = expandArray(groves,'.')
+		}
+	}
+}
+const checkEdges = () => {
+	expand = false
+	for(let i=0;i<groves.length;i++) {
+		if(groves[i][0] == '#'|| groves[i][groves.length - 1] == '#') {
+			expand = true
+			break
+		}
+	}
+	for(let j=0;j<groves[0].length;j++) {
+		if(groves[0][j] == '#') {
+			expand = true
+			break
+		}
+		if(groves[groves.length - 1][j] == '#') {
+			expand = true
+			break
+		}
+	}
+	expandIfNeeded()
+}
+const logGrove = () => {
+	for(let i=0;i<groves.length;i++) {
+		let groveString = ''
+		for(let j=0;j<groves[i].length;j++) {
+			groveString += groves[i][j]
+		}
+		console.log(groveString)
+	}
+}
+const elfPositions = arr => 
+	[	arr.reduce((acc, currentElement, y) => acc.concat(currentElement
+			.map((c, x) => [x, c])
+			.filter(([, c]) => c == '#')
+			.map(([x]) =>  {
+				return {
+						x: x, 
+						y: y,
+						proposal: {x: x, y:y},
+						moving: false,
+						canMoveNorth() {
+							return canMoveNorth(this)
+							},
+						canMoveSouth() {
+							return canMoveSouth(this)
+							},
+						canMoveWest() {
+							return canMoveWest(this)
+							},
+						canMoveEast() {
+							return canMoveEast(this)
+							},
+						}
+				}
+			)),[]),
+	];
+
+const canMoveNorth = elf => {
+	return groves[elf.y-1][elf.x-1] == '.' && groves[elf.y-1][elf.x] == '.' && groves[elf.y-1][elf.x+1] == '.';
+}
+const canMoveSouth = elf => {
+	return groves[elf.y+1][elf.x-1] == '.' && groves[elf.y+1][elf.x] == '.' && groves[elf.y+1][elf.x+1] == '.';
+}
+const canMoveWest = elf => {
+	return groves[elf.y-1][elf.x-1] == '.' && groves[elf.y][elf.x-1] == '.' && groves[elf.y+1][elf.x-1] == '.';
+}
+const canMoveEast = elf => {
+	return groves[elf.y-1][elf.x+1] == '.' && groves[elf.y][elf.x+1] == '.' && groves[elf.y+1][elf.x+1] == '.';
+}
+const proposeNorth = elf => {
+	if(elf.canMoveNorth()) {
+//		console.log('move north',elf)
+		elf.proposal.y--
+		proposals.push(JSON.stringify(elf.proposal))
+		return true;
+	}
+	return false;
+}
+const proposeSouth = elf => {
+	if(elf.canMoveSouth()) {
+//		console.log('move south',elf)
+		elf.proposal.y++
+		proposals.push(JSON.stringify(elf.proposal))
+		return true;
+	}
+	return false;
+}
+const proposeWest = elf => {
+	if(elf.canMoveWest()) {
+//		console.log('move west',elf)
+		elf.proposal.x--
+		proposals.push(JSON.stringify(elf.proposal))
+		return true;
+	}
+	return false;
+}
+const proposeEast = elf => {
+	if(elf.canMoveEast()) {
+//		console.log('move east',elf)
+		elf.proposal.x++
+		proposals.push(JSON.stringify(elf.proposal))
+		return true;
+	}
+	return false;
+}
+let proposeDirections = [proposeNorth,proposeSouth,proposeWest,proposeEast];
+
+const getProposals = (elfPositions,groves, round) => {
+//	console.log('proposals elfPositions',elfPositions)
+	let movedElves = 0;
+	proposals = []
+	for(let i=0;i<elfPositions.length;i++) {
+		let elf = elfPositions[i]
+
+		if(elf.canMoveNorth() && elf.canMoveSouth() && elf.canMoveWest() && elf.canMoveEast()) {
+//			console.log('spaces all round - do nothing',elf)
+		}
+		else {
+			for(let startDirection = round; startDirection < round + proposeDirections.length;startDirection++) {
+				if(proposeDirections[startDirection % proposeDirections.length](elf)) {
+					break;
+				}	
+			}
+		}
+	}
+	let uniqueProposals = proposals.filter((element, index, array) => {
+        return array.indexOf(element) === array.lastIndexOf(element);
+    });
+
+	uniqueProposals.forEach(proposal => {
+		proposal = JSON.parse(proposal)
+		let originalPosition = elfPositions.find(elfPosition => elfPosition.proposal.x == proposal.x && elfPosition.proposal.y == proposal.y)
+		groves[proposal.y][proposal.x] = '#';
+		groves[originalPosition.y][originalPosition.x] = '.';
+		movedElves++
+	});
+	return movedElves;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const groveScan = file
+			.replace(/\r/g, '') 
+			.split(/\n/) 
+			.forEach(line => groves.push(line.split('')))
+			
+			maxX = groves[0].length
+			maxY = groves.length
+			
+			for(let round = 0;round < Infinity ;round++) {
+		    	checkEdges();
+//				console.log('round',round)
+				let positions = elfPositions(groves)
+		    	let movedElves = getProposals(...positions,groves,round)
+		    	
+				
+//				logGrove();
+		    	if (movedElves == 0) {
+		    		result = round + 1
+		    		break;
+		    	}
+			}
+			document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
