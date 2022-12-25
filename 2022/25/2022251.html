@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+const base = 5;
+
+const convertToSnafu = (decimal) => {
+	let snafu = ''
+	do {
+		let remainder = decimal % base
+		switch(remainder) {
+			case 4:
+				snafu = "-" + snafu
+				decimal += base
+				break
+			case 3:
+				snafu = "=" + snafu
+				decimal += base
+				break
+			default:
+				snafu = remainder + snafu
+		}
+		decimal = (decimal - remainder) / base
+	} while (decimal > 0)
+
+	return snafu;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const fuelRequirements = file
+			.replace(/\r/g, '') 
+			.split(/\n/) 
+			.map(line => line.match(/(2|1|0|-|=)/g).reverse().map((digit,i) => {
+				let number = 0;
+				switch(digit) {
+				case '=':
+					number = -2
+					break
+				case '-':
+					number = -1
+					break
+				default:
+					number = parseInt(digit,10)
+				}
+				return base ** i * number
+			}).reduce((acc,current) => acc + current,0)
+			).reduce((acc,current) => acc + current,0)
+
+			console.log(fuelRequirements)
+			
+			document.getElementById('result').value = convertToSnafu(fuelRequirements);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
