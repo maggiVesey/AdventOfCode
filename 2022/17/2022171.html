@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+#grid {
+	margin-left:10%;
+	margin-top:5%;
+	font-family:monospace;
+}
+</style>
+<script>
+
+const rockCount = 1000000000000;
+
+let jetList = []
+
+let rocks = []
+rocks.push({coords:[{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:3,y:0}]});
+rocks.push({coords:[{x:0,y:1},{x:1,y:0},{x:1,y:2},{x:2,y:1}]});
+rocks.push({coords:[{x:0,y:0},{x:1,y:0},{x:2,y:0},{x:2,y:1},{x:2,y:2}]});
+rocks.push({coords:[{x:0,y:0},{x:0,y:1},{x:0,y:2},{x:0,y:3}]});
+rocks.push({coords:[{x:0,y:0},{x:1,y:0},{x:0,y:1},{x:1,y:1}]});
+
+let highestInColumn = new Array(7).fill(0);
+const highestColumn = () => Math.max(...highestInColumn)
+const lowestColumn = () => Math.min(...highestInColumn)
+
+const stoppedRocks = new Set();
+
+function canMoveLeft(rock,rockLeft,rockBottom) {
+	for(let i=0;i<rock.coords.length;i++) {
+		let newLeft = rockLeft + rock.coords[i].x - 1
+		if( newLeft < 0 || stoppedRocks.has(`${newLeft},${rock.coords[i].y + rockBottom}`)) {			
+
+//			console.log('can\'t move left')
+			return false;
+		}
+	}
+//	console.log('can move left')
+	return true
+}
+function canMoveRight(rock,rockLeft,rockBottom) {
+	for(let i=0;i<rock.coords.length;i++) {
+		let newRight = rockLeft + rock.coords[i].x + 1
+		if( newRight == 7 || stoppedRocks.has(`${newRight},${rock.coords[i].y + rockBottom}`)) {
+//			console.log('can\'t move right')
+			return false;
+		}
+	}
+//	console.log('can move right')
+	return true
+}
+function canMoveDown(rock,rockLeft,rockBottom) {
+	for(let i=0;i<rock.coords.length;i++) {
+		let newBottom = rockBottom + rock.coords[i].y - 1
+		if(newBottom < 0 || stoppedRocks.has(`${rockLeft + rock.coords[i].x},${newBottom}`)) {
+//			console.log('can\'t move down')
+			return false;
+		}
+	}
+//	console.log('can move down')
+	return true
+}
+function calculateHeights(rock,rockLeft,rockBottom) {
+	for(let i=0;i<rock.coords.length;i++) {
+		stoppedRocks.add(`${rock.coords[i].x + rockLeft},${rock.coords[i].y + rockBottom}`)			
+		if(rock.coords[i].y + rockBottom  + 1 > highestInColumn[rock.coords[i].x + rockLeft]) {
+			highestInColumn[rock.coords[i].x + rockLeft] = rock.coords[i].y + rockBottom + 1
+		}
+	}
+}
+function drawRocks(rockNumber) {
+	let grid = []
+	for(let i= 0;i< highestColumn() + 3;i++) {
+		grid[i] = []
+		for (let j=0;j<7;j++) {
+			grid[i].push('.')
+		}
+	}
+	stoppedRocks.forEach(rock => {
+		let coords = rock.split(',').map(Number)
+		grid[coords[1]][coords[0]] = '#'
+	})
+	
+	let innerHTML = 'new rock ' + rockNumber + '<br />'
+	for(let i=grid.length - 1;i>=0;i--) {
+		for (let j=0;j<grid[i].length;j++) {
+			innerHTML += grid[i][j]
+		}
+		innerHTML += '&nbsp;&nbsp;'+ i + '<br />'
+	}
+	document.getElementById('grid').innerHTML = innerHTML;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const originalJetList = file
+			.replace(/\r/g, '') 
+			.split('') 
+
+			jetList = [...originalJetList];
+			
+			for(let i=0;i<rockCount;i++) {
+				let rockLeft = 2;
+				let rockBottom = highestColumn() + 3;
+				let stopped = false;
+				
+				let rock = rocks[i%rocks.length];
+
+				while(!stopped) {
+					let jet = jetList.shift();
+					switch(jet) {
+						case "<":
+							if(canMoveLeft(rock,rockLeft,rockBottom)) {
+								rockLeft--
+							}
+							break
+						case ">":
+							if(canMoveRight(rock,rockLeft,rockBottom)) {
+								rockLeft++
+							}
+							break
+						default :
+							console.log('unrecognised jet at rockcount',rockCount)
+							stopped = true
+					}
+					if(canMoveDown(rock,rockLeft,rockBottom)) {
+						rockBottom--
+					}
+					else {
+						calculateHeights(rock,rockLeft,rockBottom)
+						stopped = true;
+					}
+					if(jetList.length == 0) {
+						jetList = [...originalJetList];
+					}
+				}
+			}
+//			drawRocks(rockCount)
+			document.getElementById('result').value = highestColumn();
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="grid"></div>
+</body>
+</html>
