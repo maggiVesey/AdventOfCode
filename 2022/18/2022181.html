@@ -46,7 +46,7 @@ function aocFunction(input) {
 			  })
 			  
 		cubes.forEach(cube => {
-//			console.log(...cube)
+			console.log(cube)
 			let [x,y,z] = cube.split(",").map(Number)
 			result += countOpenSides(x,y,z)
 		})
