@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+#path {
+	margin-left:10%;
+	margin-top:5%;
+	font-family:monospace;
+}
+</style>
+<script>
+
+const RIGHT = 0;
+const DOWN = 1;
+const LEFT = 2;
+const UP = 3;
+
+let jungle = []
+let path = []
+
+let currentRow = 0;
+let currentColumn = 0;
+let facing = 0;
+
+const takeSteps = maxSteps => {
+	if(facing == RIGHT) {
+		let i = currentColumn
+		let lastGoodI = i
+		let steps = 0
+		while (steps <= maxSteps) {
+			if(i == jungle[currentRow].length) {
+				i = 0
+			}
+			if(jungle[currentRow].length < i || jungle[currentRow][i] == undefined || jungle[currentRow][i] == ' ') {
+				i++
+			}
+			else if(jungle[currentRow][i] == '#') {
+				currentColumn = lastGoodI
+				break
+			}
+			else {
+				jungle[currentRow][i] = 'r'
+				lastGoodI = i
+//				drawPath()
+				i++
+				steps++
+			}
+		} 
+		if(steps >= maxSteps) {
+			i--
+			currentColumn = i
+		}
+	}
+	if(facing == DOWN) {
+		let i = currentRow
+		let lastGoodI = i
+		let steps = 0
+		while (steps <= maxSteps) {
+			if(i == jungle.length) {
+				i = 0
+			}
+			if(jungle[i] == undefined || jungle[i].length < currentColumn || jungle[i][currentColumn] == ' ') {
+				i++
+			}
+			else if(jungle[i][currentColumn] == '#') {
+				currentRow = lastGoodI
+				break
+			}
+			else {
+				jungle[i][currentColumn] = 'd'
+				lastGoodI = i
+//				drawPath()
+				i++
+				steps++
+			}
+		} 
+		if(steps >= maxSteps) {
+			currentRow = i - 1
+		}
+	}
+	if(facing == LEFT) {
+		let i = currentColumn
+		let lastGoodI = i
+		let steps = 0
+		while (steps <= maxSteps) {
+			if(i < 0) {
+				i = jungle[currentRow].length - 1
+			}
+			if(jungle[currentRow].length < i || jungle[currentRow][i] == undefined || jungle[currentRow][i] == ' ') {
+				i--
+			}
+			else if(jungle[currentRow][i] == '#') {
+				currentColumn = lastGoodI
+				break
+			}
+			else {
+				jungle[currentRow][i] = 'l'
+				lastGoodI = i
+//				drawPath()
+				i--
+				steps++
+			}
+		} 
+		if(steps >= maxSteps) {
+			currentColumn = i + 1
+		}
+	}
+	if(facing == UP) {
+		let i = currentRow
+		let lastGoodI = i
+		let steps = 0
+		while (steps <= maxSteps) {
+			if(i < 0) {
+				i = jungle.length
+			}
+			if(jungle[i] == undefined || jungle[i].length < currentColumn || jungle[i][currentColumn] == ' ') {
+				i--
+			}
+			else if(jungle[i][currentColumn] == '#') {
+				currentRow = lastGoodI
+				break
+			}
+			else {
+				jungle[i][currentColumn] = 'u'
+				lastGoodI = i
+//				drawPath()
+				i--
+				steps++
+			}
+		} 
+		if(steps >= maxSteps) {
+			currentRow = i + 1
+		}
+	}
+}
+const drawPath = () => {
+	let innerHTML = ''
+	let longestRow = Math.max(...jungle.map(i => i.length))
+	let maxPower = (longestRow + '').length
+	for (let i=maxPower - 1;i>=0;i--) {
+		for (let j=0;j<longestRow;j++) {
+			innerHTML += (j % 10 ** i == 0) ? (j  %  10 ** (i + 1)) / 10 ** i:'&nbsp;';
+		}
+		innerHTML += '<br />'
+	}
+	for(let i=0;i<jungle.length;i++) {
+		for (let j=0;j<jungle[i].length;j++) {
+			innerHTML += jungle[i][j].replace(' ','&nbsp;')
+		}
+		innerHTML += '&nbsp;&nbsp;'+ i + '<br />'
+	}
+	document.getElementById('path').innerHTML = innerHTML;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const monkeyNotes = file
+			.replace(/\r/g, '') 
+			.split(/\n\n/) 
+
+			jungle = monkeyNotes[0]
+				.split(/\n/)
+				.map(line => line.split(''))
+				
+			path =  monkeyNotes[1].match(/\d+|(L|R)/g);
+		
+			jungle = [...jungle]
+		
+//			console.log(jungle)
+//			console.log(path)
+			
+			for(let i=0;i<path.length;i++) {
+				if(Number.isInteger(Number(path[i]))) {
+					takeSteps(parseInt(path[i],10))
+				}
+				else {
+					if(path[i] == 'R') {
+						facing = (facing + 1) % 4
+					}
+					if(path[i] == 'L') {
+						facing = (facing + 3) % 4
+					}
+				}
+			}
+			
+//			drawPath()
+
+			console.log('currentRow',currentRow,'currentColumn',currentColumn,'facing',facing)
+			let finalPassword = 1000 * (currentRow + 1) + 4 * (currentColumn + 1) + facing;
+		
+			document.getElementById('result').value = finalPassword;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="path"></div>
+</body>
+</html>
