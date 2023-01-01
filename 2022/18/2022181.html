@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let cubes = new Set()
+
+const countOpenSides = (x, y, z) => {
+	  let openSides = 6;
+	  if (cubes.has(`${x+1},${y},${z}`)) {
+		  openSides--
+	  }
+	  if (cubes.has(`${x-1},${y},${z}`)) {
+		  openSides--
+	  }
+	  if (cubes.has(`${x},${y+1},${z}`)) {
+		  openSides--
+	  }
+	  if (cubes.has(`${x},${y-1},${z}`)) {
+		  openSides--
+	  }
+	  if (cubes.has(`${x},${y},${z+1}`)) {
+		  openSides--
+	  }
+	  if (cubes.has(`${x},${y},${z-1}`)) {
+		  openSides--
+	  }
+
+	  return openSides;
+	};
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const cubeData = file
+			.replace(/\r/g, '') 
+			.split(/\n/) 
+			.map(line => {
+			    cubes.add(line);
+			  })
+			  
+		cubes.forEach(cube => {
+//			console.log(...cube)
+			let [x,y,z] = cube.split(",").map(Number)
+			result += countOpenSides(x,y,z)
+		})
+
+		console.log(cubes)
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = '';
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
