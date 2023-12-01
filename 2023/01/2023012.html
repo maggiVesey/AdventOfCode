@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	const str2num = new Map([
+	  ["one","o1e"],
+	  ["two","t2o"],
+	  ["three","t3e"],
+	  ["four","f4r"],
+	  ["five","f5e"],
+	  ["six","s6x"],
+	  ["seven","s7n"],
+	  ["eight","e8t"],
+	  ["nine","n9e"],
+	]);
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		allLines.forEach((calibrationLine) => {
+			let subbedCalibrationLine = calibrationLine;
+			for (const [str, num] of str2num) {
+				subbedCalibrationLine = subbedCalibrationLine.replaceAll(str,num)
+			}
+		 	console.log(subbedCalibrationLine);
+			let digitLine = subbedCalibrationLine.split('').filter(line => line.match(/\d/g));
+			let firstDigit = digitLine.find(digit => digit !== null);
+			let lastDigit = digitLine.findLast(digit => digit !== null);
+			result += parseInt(firstDigit + lastDigit);
+ 		});
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
