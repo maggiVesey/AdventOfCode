@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	const maxRed = 12;
+	const maxGreen = 13;
+	const maxBlue = 14;
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0;
+
+		allLines.forEach((line) => {
+			let possible = true;
+			
+			let game = line.split(': ');
+			let gameNo = parseInt(game[0].split('Game ')[1]);
+			let handfuls = game[1].split('; ');
+			
+			for(let i=0;i<handfuls.length;i++) {
+
+				let cubes = handfuls[i].split(', ');
+				for(let j=0;j<cubes.length;j++) {
+					let cubeInfo = cubes[j].split(' ');
+
+					switch (cubeInfo[1]) {
+					  case 'red':
+					    if (parseInt(cubeInfo[0]) > maxRed) {
+							possible = false;
+						}
+					    break;
+					  case 'green':
+					    if (parseInt(cubeInfo[0]) > maxGreen) {
+							possible = false;
+						}
+					    break;
+					  case 'blue':
+					    if (parseInt(cubeInfo[0]) > maxBlue) {
+							possible = false;
+						}
+					    break;
+					  default:
+					    console.log(`Unknown colour ${cubeInfo[1]}`);
+					}
+					if(!possible) {
+						break;
+					}
+				}
+				if(!possible) {
+					break;
+				}
+			}
+			if(possible) {
+				result += gameNo;
+			}
+		});
+
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
