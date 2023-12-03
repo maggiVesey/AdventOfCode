@@ -119,11 +119,8 @@ function drawSchematic() {
 		for(let j=0;j<schematic[i].length;j++) {
 			tableString += '<td';
 			tableString += ' id="td_'+i+'_'+j+'"';
-			tableString += ' class="'
-			if ('*' == schematic[i][j]) {
-				tableString += 'gear'
-			}
-			tableString += '">'
+			tableString += ' class="' +(('*' == schematic[i][j]) ? 'gear' :'') +'"';
+			tableString += '>'
 			tableString += schematic[i][j]
 			tableString += '</td>'
 		}
