@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+	.gear {
+		color:red;
+		font-weight:bold;
+		background-color:black;
+	}
+	.ratioAdded {
+		font-weight:normal;
+		color:green;
+	}
+	.checked {
+		background-color:white;
+	}
+</style>
+<script>
+
+let result = 0;;
+const schematic = [];
+let currentPartNumber = '';
+
+function checkOtherRow(rowNumber,column,thisPartList) {
+	let a = column - 1;
+	
+	//read back from diagonal left
+	while(a > 0 && schematic[rowNumber][a].match(/\d/)) {
+		a--;
+	}
+	if(a == 0 || a < column - 1) {
+		if(!schematic[rowNumber][a].match(/\d/)) {
+			a++;
+		}
+		while(a<schematic[rowNumber].length && schematic[rowNumber][a].match(/\d/)) {
+			currentPartNumber += schematic[rowNumber][a]
+			a++
+		}
+		if('' != currentPartNumber) {
+			thisPartList.push(currentPartNumber)
+			currentPartNumber = ''
+		}
+	}
+	//read from above or diagonal right
+	if(a <= column && !schematic[rowNumber][column-1].match(/\d/) || (schematic[rowNumber][column-1].match(/\d/) && schematic[rowNumber][column].match(/\./))) {
+		if(schematic[rowNumber][column].match(/\d/)) {
+			a = column;
+		}
+		else {
+			if(schematic[rowNumber][column+1].match(/\d/)) {
+				a = column + 1;
+			}
+		}
+		while(a<schematic[rowNumber].length && schematic[rowNumber][a].match(/\d/)) {
+			currentPartNumber += schematic[rowNumber][a]
+			a++
+		}
+		if('' != currentPartNumber) {
+			thisPartList.push(currentPartNumber)
+			currentPartNumber = ''
+		}
+	}
+}
+
+function countPartNumbers(x,y) {
+
+	const partList = [];
+	//not first row
+	if(x > 0) {
+		checkOtherRow(x-1,y,partList)
+	}
+	//current row previous
+	let a = y-1;
+	while(a > 0 && schematic[x][a].match(/\d/)) {
+		a--;
+	}
+	if(a==0 || a < y - 1) {
+		if(!schematic[x][a].match(/\d/)) {
+			a++
+		}
+		while(a<schematic[x].length && schematic[x][a].match(/\d/)) {
+			currentPartNumber += schematic[x][a]
+			a++
+		}
+		if('' != currentPartNumber) {
+			partList.push(currentPartNumber)
+			currentPartNumber = ''
+		}
+	}
+	if(schematic[x][y+1].match(/\d/)) {
+		a = y + 1;
+	}
+	//current row next
+	while(a<schematic[x].length && schematic[x][a].match(/\d/)) {
+		currentPartNumber += schematic[x][a]
+		a++
+	}
+	if('' != currentPartNumber) {
+		partList.push(currentPartNumber)
+		currentPartNumber = ''
+	}
+	
+	//not last row
+	if(x+1<schematic.length) {
+		checkOtherRow(x+1,y,partList)
+	}
+
+	return partList;
+}
+function drawSchematic() {
+	let tableString = '<table>'
+	for(let i=0;i<schematic.length;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<schematic[i].length;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+i+'_'+j+'"';
+			tableString += ' class="'
+			if ('*' == schematic[i][j]) {
+				tableString += 'gear'
+			}
+			tableString += '">'
+			tableString += schematic[i][j]
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("schematic").innerHTML = tableString;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			schematic.push(line.split(''));
+		});
+
+//		drawSchematic();
+		
+		for(let i=0;i<schematic.length;i++) {
+			for(let j=0;j<schematic[i].length;j++) {
+				if(schematic[i][j].match(/\*/)) {
+					let partNumbers = countPartNumbers(i,j);
+					
+					if(2 == partNumbers.length) {
+						result += parseInt(partNumbers[0]) * parseInt(partNumbers[1]);
+						document.getElementById('td_'+i+'_'+j)?.classList.add('ratioAdded');
+					}
+					document.getElementById('td_'+i+'_'+j)?.classList.add('checked');
+				}
+			}
+		}
+		
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="schematic"></div>
+</body>
+</html>

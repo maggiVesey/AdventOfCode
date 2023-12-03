@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let result = 0;;
+const schematic = [];
+
+function isSymbol(symbol) {
+	if (symbol.match(/\d|\./)) {
+		return false;
+	}
+	return true;
+}
+function isAdjacentToASymbol(x,y,digits) {
+	
+	//not first row
+	if(x>0) {
+		for(let i=y-digits-1;i<=y;i++) {
+			if(i>=0 && i<schematic[x-1].length) {
+				if(isSymbol(schematic[x-1][i])) {
+					return true;
+				}
+			}
+		}
+	}
+	//current row previous
+	if(y-digits-1>0 && isSymbol(schematic[x][y-digits-1])) {
+		return true;
+	}
+	//current row next
+	if(y+1<schematic[x].length && isSymbol(schematic[x][y])) {
+		return true;
+	}
+
+	//not last row
+	if(x+1<schematic.length) {
+		for(let i=y-digits-1;i<=y;i++) {
+			if(i>=0 && i<schematic[x+1].length) {
+				console.log('check',x+1,i)
+				if(isSymbol(schematic[x+1][i])) {
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line) => {
+			schematic.push(line.split(''));
+		});
+
+		let currentPartNumber = '';
+		
+		for(let i=0;i<schematic.length;i++) {
+			for(let j=0;j<schematic[i].length;j++) {
+				if(!schematic[i][j].match(/\d/)) {
+					if(currentPartNumber != '') {
+						if(isAdjacentToASymbol(i,j,currentPartNumber.length)) {
+							result += parseInt(currentPartNumber);
+						}
+					}
+					currentPartNumber = '';
+				}
+				else {
+					currentPartNumber += schematic[i][j];
+				}
+			}
+			//end of row
+			if(currentPartNumber != '') {
+				if(isAdjacentToASymbol(i,schematic[i].length,currentPartNumber.length)) {
+					result += parseInt(currentPartNumber);
+				}
+			}
+			currentPartNumber = '';
+		}
+		
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
