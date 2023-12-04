@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let result = 0;
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		const copies = new Array(allLines.length).fill(1); 
+		
+		allLines.forEach((line,index) => {
+
+		    const numbers = line.match(/\d+/g).slice(1) // first number is Card, assume no duplicates each side
+		    let nonUnique = numbers.length - new Set(numbers).size ;
+		    for(let i=1;i<=nonUnique;i++) {
+				copies[index + i] += copies[index];
+			}
+   		});
+		result = copies.reduce((acc,current) => acc + current,0);    
+		    
+		document.getElementById('result').append(result);
+	};
+		
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
