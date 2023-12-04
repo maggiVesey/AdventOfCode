@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let result = 0;
+
+//https://github.com/jtlehtinen/aoc/blob/main/src/2023/03.js
+
+const adjacent = (numberEntity, symbolEntity) => {
+  // Expand the number entity by one in each direction => point in a rectangle test.
+  const x0 = numberEntity.x - 1
+  const x1 = numberEntity.x + numberEntity.token.length
+  const y0 = numberEntity.y - 1
+  const y1 = numberEntity.y + 1
+  return symbolEntity.x >= x0 && symbolEntity.x <= x1 && symbolEntity.y >= y0 && symbolEntity.y <= y1
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+	  	const entities = []
+
+		  for (const [y, line] of file.split(/\r\n|\n/).entries()) {
+		    for (const m of line.matchAll(/\d+/g))
+		      entities.push({ type: 'number', x: m.index, y, token: m[0], value: parseInt(m[0]) })
+		
+		    for (const m of line.matchAll(/[^0-9\.]/g))
+		      entities.push({ type: 'symbol', x: m.index, y, token: m[0] })
+		  }
+
+		  console.log(entities)
+		  const numbers = entities.filter(e => e.type === 'number')
+		  const symbols = entities.filter(e => e.type === 'symbol')
+		
+		  result = symbols
+		    .filter(s => s.token === '*')
+		    .map(s => {
+		      const adjacentNumbers = numbers.filter(n => adjacent(n, s)).map(n => n.value)
+		      return adjacentNumbers.length === 2 ? adjacentNumbers[0] * adjacentNumbers[1] : 0
+		    })
+		    .reduce((a, b) => a + b, 0)
+		    
+		document.getElementById('result').append(result);
+	};
+		
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
