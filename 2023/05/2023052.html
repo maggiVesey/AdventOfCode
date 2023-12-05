@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+let result = 0;
+const seeds = [];
+const almanacMap = [];
+let currentMap = 0;
+let mapNumber = 0;
+
+const almanacAttributes = [
+  'seed',
+  'soil', 
+  'fertilizer',
+  'water', 
+  'light', 
+  'temperature',
+  'humidity', 
+  'location'
+];
+
+const mapNames = [
+'seed-to-soil',
+'soil-to-fertilizer',
+'fertilizer-to-water',
+'water-to-light',
+'light-to-temperature',
+'temperature-to-humidity',
+'humidity-to-location']
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = Number.POSITIVE_INFINITY;
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		allLines.forEach((line) => {
+			if('' != line) {
+				if(line.startsWith('seeds:')) {
+					let seedStart = 0;
+					let seedRanges = line.match(/\d+/g)
+					for(let i=0;i<seedRanges.length;i++) {
+						if(0 == i % 2) {
+							seedStart = parseInt(seedRanges[i]);
+						}
+						else {
+							let seedRange = parseInt(seedRanges[i]);
+					      	seeds.push({start:seedStart,range:seedRange});
+						}
+					}
+				}
+				else if(line.startsWith(mapNames[currentMap])) {
+					almanacMap[currentMap] = [];
+					mapNumber = currentMap++;
+				}
+				else {
+					let range = line.split(' ');
+			      	almanacMap[mapNumber].push({
+					  destination:parseInt(range[0]),
+					  source:parseInt(range[1]),
+					  range:parseInt(range[2])});
+				}
+			}
+   		});
+   		
+		for(let j=0;j<seeds.length;j++) {	
+			for(let m=0;m<seeds[j].range;m++) {
+				
+				let thisAttribute = seeds[j].start + m;
+				let nextAttribute = thisAttribute;
+				
+				
+				for(let i=0;i<almanacAttributes.length-1;i++) {
+					for(let k=0;k<almanacMap[i].length;k++) {
+						if(thisAttribute >= almanacMap[i][k].source && thisAttribute < almanacMap[i][k].source + almanacMap[i][k].range) {
+							nextAttribute = thisAttribute - almanacMap[i][k].source + almanacMap[i][k].destination;
+						}
+					}	
+					thisAttribute = nextAttribute
+				}
+				if(nextAttribute < result) {
+					result = nextAttribute;
+				}	
+			}
+		}
+
+		document.getElementById('result').append(result);
+	};
+		
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
