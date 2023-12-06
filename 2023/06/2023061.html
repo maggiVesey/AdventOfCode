@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const [times, distances] = file
+		    .split(/\r\n|\n/)
+    		.map((line) => line.match(/\d+/g).map(Number));
+
+		const waysToWin = new Array(times.length).fill(0)
+
+		for(let i=0;i<times.length;i++) {
+			for(let j=1;j<times[i];j++) {
+				let distance = (times[i] - j)  * j; 
+				if(distance > distances[i]) {
+					waysToWin[i]++
+				}
+			}
+		}
+		console.log(waysToWin)
+		result = waysToWin.reduce((acc,current) => acc * current,1);
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
