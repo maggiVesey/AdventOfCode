@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+
+const cardOrder = 'AKQjT98765432';
+
+function handStrengthOrder(a,b) {
+  if (a.handType < b.handType) {
+    return -1;
+  } 
+  else if (a.handType > b.handType) {
+    return 1;
+  }
+  for(let i=0;i<5;i++) {
+	  if(cardOrder.indexOf(a.cards.charAt(i)) > cardOrder.indexOf(b.cards.charAt(i))) {
+   		return -1;
+	  }
+ 	  else if (cardOrder.indexOf(a.cards.charAt(i)) < cardOrder.indexOf(b.cards.charAt(i))) {
+    	return 1;
+	  }
+  }
+  return 0;
+}
+
+function handType(hand) {
+	let cards = new Set(hand)
+	if(1 == cards.size) {
+		return 6; //Five of a kind, where all five cards have the same label: AAAAA
+	}
+	else if(2 == cards.size) {
+        const [ a, b ] = cards;
+        let countFirst = (hand.match(new RegExp(a, 'g'))||[]).length;
+       	if(1 == countFirst || 4 == countFirst) {
+        	return 5; // Four of a kind, where four cards have the same label and one card has a different label: AA8AA
+		}
+		return 4; // Full house, where three cards have the same label, and the remaining two cards share a different label: 23332
+	}
+	else if(3 == cards.size) {
+        const [ a, b, c ] = cards;
+        let countFirst = (hand.match(new RegExp(a, 'g'))||[]).length;
+       	if(3 == countFirst) {
+			return 3; // Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
+		}
+       	else if(2 == countFirst) {
+			return 2; // Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
+		}
+		else {
+      		let countSecond = (hand.match(new RegExp(b, 'g'))||[]).length;
+	       	if(3 == countSecond) {
+				return 3; // Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
+			}
+	       	else if(2 == countSecond) {
+				return 2; // Two pair, where two cards share one label, two other cards share a second label, and the remaining card has a third label: 23432
+			}
+		}
+		return 3; // Three of a kind, where three cards have the same label, and the remaining two cards are each different from any other card in the hand: TTT98
+	}
+	else if(4 == cards.size) {
+		return 1; // One pair, where two cards share one label, and the other three cards have a different label from the pair and each other: A23A4
+	}
+	return 0; // High card, where all cards' labels are distinct: 23456
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+
+		const hands = allLines
+			.map(hand => hand.split(/\s/))
+			.map(([cards, bid]) => ({ cards: cards, bid: Number(bid), handType: handType(cards)}));
+     	
+    	hands.sort(handStrengthOrder);
+    	
+    	console.log(hands)
+    	result = hands.reduce((acc,current,index) => acc += (index + 1) * current.bid,0);
+      	
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
