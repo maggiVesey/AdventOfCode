@@ -34,7 +34,7 @@ function replaceJWithMostCommonCharacter(str) {
 			.match(/(\w)\1*/g)
 			.sort((x, y) => y.length - x.length) // no need to order by card order at this stage
 			.join('')
-			.replaceAll('J','');
+			.replaceAll('J','');  // in case mostly jokers
 		return str.replaceAll('J',charsInFrequencyOrder[0]);
 	}
 	return str;
