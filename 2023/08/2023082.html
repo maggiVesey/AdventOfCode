@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+function lowestCommonMutltiple(a,b) {
+    return (a * b) / greatestCommonDivisor(a, b);
+}
+
+function greatestCommonDivisor(a,b) {
+    return !b ? a : greatestCommonDivisor(b, a % b);
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let directions = [];
+		const nodes = new Map();
+
+		allLines.forEach((line,index) => {
+			if(0 == index) {
+				directions = line.split('');
+			}
+			if(1 < index) {
+				nodes.set(line.substring(0,3),{L:line.substring(7,10),R:line.substring(12,15)})
+			}
+		});
+		
+		console.log(directions)
+		console.log(nodes)
+
+ 		let currentNodes = [...nodes.keys()].filter((key) => key.endsWith('A'));
+		console.log(currentNodes)
+		let results = new Array(currentNodes.length).fill(0);
+ 		
+ 		for(let i=0;i<currentNodes.length;i++) {
+			let direction = 0;
+			let currentDirection = directions[direction++];
+		
+			let currentNode = currentNodes[i];
+			while(!currentNode.endsWith('Z')) {
+				let node = nodes.get(currentNode);
+				currentNode = node[currentDirection];
+	
+				direction = direction % directions.length;
+				currentDirection = directions[direction++];
+				results[i]++;
+				console.log(currentNode,currentDirection);
+			}
+		 }
+		console.log(results) 
+		
+		// there's a big assumption here that the patterns repeat, but apparently they do
+		result = results.reduce((a, b) => lowestCommonMutltiple(a, b), 1)
+
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
