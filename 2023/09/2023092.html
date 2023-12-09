@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result;
+
+const findDifferences = (history) => {
+  const differences = [];
+  for (let i=1;i<history.length;i++) {
+    differences.push(history[i] - history[i - 1])
+  }
+  return differences;
+};
+
+const predictFirstValue = (history) => {
+//  console.log('history',history)
+
+  if (history.every(h => h == history[0])) {
+    return history[0];
+  }
+
+  const diffs = findDifferences(history);
+  const predicted = predictFirstValue(diffs);
+//  console.log('predicted',predicted)
+
+  return history[0] - predicted;
+};
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		const histories = allLines.map(line => line.split(' ').map(Number));
+//		console.log(histories)
+
+		const predictions = histories.map(predictFirstValue);
+//		console.log('predictions',predictions)
+		
+		result = predictions.reduce((acc,current) => acc + current,0);
+
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
