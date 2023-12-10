@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+	.visited {
+		color:red;
+		font-weight:bold;
+	}
+	.enclosed {
+		color:blue;
+		font-weight:bold;
+	}
+</style>
+<script>
+
+var tiles = [];
+var startPos;
+const visited = [];
+
+function initialDirection(thisPos) {
+	if(thisPos.x < startPos.x) {
+		startPos.fromDirection = 'U'
+	}
+	if(thisPos.x > startPos.x) {
+		startPos.fromDirection = 'D'
+	}
+	if(thisPos.y < startPos.y) {
+		startPos.fromDirection = 'E' //use E for lEft
+	}
+	if(thisPos.y > startPos.y) {
+		startPos.fromDirection = 'R'
+	}
+}
+function finalDirection(thisPos) {
+	if(thisPos.x < startPos.x) {		
+		tiles[startPos.x][startPos.y] = 'D' == startPos.fromDirection ? '|' : 'R' == startPos.fromDirection ? 'L' :'J'
+	}
+	if(thisPos.x > startPos.x) {
+		tiles[startPos.x][startPos.y] = 'U' == startPos.fromDirection ? '|' : 'R' == startPos.fromDirection ? '7' :'F'
+	}
+	if(thisPos.y < startPos.y) {
+		tiles[startPos.x][startPos.y] = 'R' == startPos.fromDirection ? '-' :'U' == startPos.fromDirection ? 'J' :'7'
+	}
+	if(thisPos.y > startPos.y) {
+		tiles[startPos.x][startPos.y] = 'E' == startPos.fromDirection ? '-' :'U' == startPos.fromDirection ? 'L' :'F'
+	}
+}
+function canMoveTo(thisTile,x,y,direction) {
+	if(x<0||y<0||x>=tiles.length||y>=tiles[x].length) {
+		return false;
+	}
+	if('.' == tiles[x][y]) {
+		return false;
+	}
+	switch(direction) {
+		case "E":
+			return ['S','-','L','F'].includes(thisTile) && ['-','J','7'].includes(tiles[x][y])
+		case "S":
+			return ['S','|','7','F'].includes(thisTile) && ['|','L','J'].includes(tiles[x][y])
+		case "W":
+			return ['S','-','J','7'].includes(thisTile) && ['-','L','F'].includes(tiles[x][y])
+		case "N":
+			return ['S','|','L','J'].includes(thisTile) && ['|','7','F'].includes(tiles[x][y])
+		default:
+			return false;
+	}
+}
+function nextStep(thisPos) {
+	if('N' != thisPos.fromDirection && canMoveTo(tiles[thisPos.x][thisPos.y],thisPos.x-1,thisPos.y,'N')) {
+		return {'x':thisPos.x-1,'y':thisPos.y,'fromDirection':'S'}
+	}
+	if('E' != thisPos.fromDirection && canMoveTo(tiles[thisPos.x][thisPos.y],thisPos.x,thisPos.y+1,'E')) {
+		return {'x':thisPos.x,'y':thisPos.y+1,'fromDirection':'W'}
+	}
+	if('S' != thisPos.fromDirection && canMoveTo(tiles[thisPos.x][thisPos.y],thisPos.x+1,thisPos.y,'S')) {
+		return {'x':thisPos.x+1,'y':thisPos.y,'fromDirection':'N'}
+	}
+	if('W' != thisPos.fromDirection && canMoveTo(tiles[thisPos.x][thisPos.y],thisPos.x,thisPos.y-1,'W')) {
+		return {'x':thisPos.x,'y':thisPos.y-1,'fromDirection':'E'}
+	}
+	
+	finalDirection(thisPos)
+	return startPos
+}
+function findStart(tiles) {
+	for(let i=0;i<tiles.length;i++) {
+		for(let j=0;j<tiles[i].length;j++) {
+			if('S' == tiles[i][j]) {
+				return {'x':i,'y':j,'fromDirection':''}
+			}
+		}
+	}
+	return {'x':-1,'y':-1,'fromDirection':''}
+}
+function backAtStart(a,b) {
+	return 'S' == tiles[a.x][a.y] || (a.x == b.x && a.y == b.y);
+}
+function drawTiles() {
+	let tableString = '<table>'
+	for(let i=0;i<tiles.length;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<tiles[i].length;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+i+'_'+j+'"';
+			tableString += '>'
+			tableString += tiles[i][j]
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("tiles").innerHTML = tableString;
+}
+function visitedIncludes(a,b) {
+	return visited.some(v=>v.x==a&&v.y==b);
+}
+function countEnclosedTiles() {
+	let countVisited = 0;
+	for(let i=0;i<tiles.length;i++) {
+		for(let j=0;j<tiles[i].length;j++) {
+			let countLefts = 0;
+			let countRights = 0;
+//			if(!document.getElementById('td_'+i+'_'+j).classList.contains('visited')) {
+			if(!visitedIncludes(i,j)) {	
+				for(let k=j;k>=0;k--) {
+//					if(['|','L','J'].includes(tiles[i][k]) && document.getElementById('td_'+i+'_'+k).classList.contains('visited')) {
+					if(['|','L','J'].includes(tiles[i][k]) && visitedIncludes(i,k)) {
+						countLefts++
+					}
+				}
+				for(let k=j+1;k<tiles[i].length;k++) {
+//					if(['|','L','J'].includes(tiles[i][k]) && document.getElementById('td_'+i+'_'+k).classList.contains('visited')) {
+					if(['|','L','J'].includes(tiles[i][k]) && visitedIncludes(i,k)) {
+						countRights++
+					}
+				}
+				if(1 == countLefts % 2 || 1 == countRights % 2) {
+//					document.getElementById('td_'+i+'_'+j).classList.add('enclosed')
+					countVisited++
+				}
+			}
+		}
+	}
+	return countVisited;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let result = 0;
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		tiles = allLines.map(line => line.split(''));
+//		drawTiles();
+		
+		console.log(tiles)
+		startPos = findStart(tiles)
+		visited.push({'x':startPos.x,'y':startPos.y})
+		let currentPos = nextStep(startPos)
+		visited.push({'x':currentPos.x,'y':currentPos.y})
+
+		initialDirection(currentPos);
+		
+//		document.getElementById('td_'+currentPos.x+'_'+currentPos.y)?.classList.add('visited');
+//		console.log(currentPos)
+		result++;
+
+		//only need to find one loop back to start
+		while(!backAtStart(currentPos,startPos) && result < 50000 ) {
+			currentPos = nextStep(currentPos);
+			visited.push({'x':currentPos.x,'y':currentPos.y})
+//			document.getElementById('td_'+currentPos?.x+'_'+currentPos?.y)?.classList.add('visited');
+		}
+		result = countEnclosedTiles();
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="tiles"></div>
+</body>
+</html>
