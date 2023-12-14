@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+const rocks = [];
+var height;
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line, row) => line.split('')
+			.forEach((ch, col) => {
+		        if(ch != '.') {
+		            rocks.push({x:row, y:col,v:ch})
+		        }
+		    }))
+
+		for(let i=0;i<allLines[0].length;i++) {
+			let col = rocks.filter(r => r.y==i)
+			col.sort((a,b) => {
+				if('O' == a.v && '#' == b.v) {
+					return 1;
+				}
+				else if('#' == a.v && 'O' == b.v && a.x < b.x) {
+					return -1;
+				}
+				else {
+					return 0
+				}
+			})
+			let j = 0 
+			col.forEach((r, index) => {
+				if('#' == r.v) {
+					j = r.x + 1;
+				}
+				else {
+					r.x = j++
+				}
+		    })
+			result += col.reduce((acc,current) => {
+				return acc += ('O' == current.v) ? allLines.length - current.x : 0
+			},0)
+		}
+ 		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
