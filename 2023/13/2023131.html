@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result=0;
+var mirrors = [];
+
+const transpose = matrix => matrix[0].split('').map((col, i) => matrix.map(row => row[i]).join(''));
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let pattern = 0;
+	let mirrors = [];
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		mirrors[pattern] = [];
+		allLines.forEach((line) => {
+			if('' == line.trim()) {
+				pattern++
+				mirrors[pattern] = [];
+			}
+			else {
+				mirrors[pattern].push(line)
+			}
+		});
+		
+		console.log(mirrors)
+		mirrors.forEach((mirror,index) => {
+			let symmetrical = false;
+			for(i=0;i<mirror.length-1;i++) {
+				let j=0;
+				while(i+1+j<mirror.length && i-j >= 0) {
+					console.log(index,i,j,mirror[i+1+j],mirror[i-j])
+					symmetrical = mirror[i+1+j] == mirror[i-j];
+					if(!symmetrical) {
+						console.log('mirror ' +  index + 'is not horizontally symmetrical at ' + i)
+						break;
+					}
+					j++
+				}
+				result += symmetrical ? 100 * (i + 1) : 0;
+			}
+			if(!symmetrical) {
+				console.log(mirror)
+				let rirrom = transpose(mirror)
+				console.log(rirrom)
+				let symmetrical = false;
+				for(i=0;i<rirrom.length-1;i++) {
+					let j=0;
+					while(i+1+j<rirrom.length && i-j >= 0) {
+						console.log(index,i,j,rirrom[i+1+j],rirrom[i-j])
+						symmetrical = rirrom[i+1+j] == rirrom[i-j];
+						if(!symmetrical) {
+							console.log('rirrom ' +  index + 'is not horizontally symmetrical at ' + i)
+							break;
+						}
+						j++
+					}
+					result += symmetrical ? 1 * (i + 1) : 0;
+				}
+			}
+		})
+		
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>

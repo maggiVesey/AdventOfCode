@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result=0;
+var mirrors = [];
+
+const transpose = matrix => matrix[0].split('').map((col, i) => matrix.map(row => row[i]).join(''));
+const onesmudge = (a,b) => {
+	let smudges = 0;
+	b.split('').forEach((char,index) => char == a.charAt(index) ? smudges : smudges++)
+	return 1 == smudges
+}
+const findReflection = (mirror,multiplier,index) => {
+	let symmetrical = false;
+	let up = ''
+	let down = ''
+	
+	let row = 1
+	while (row < mirror.length) {
+		up = ''
+		down = ''
+		let i=row;
+		let j=row-1;
+		while(j>=0 && i<mirror.length) {
+			up += mirror[j--];
+			down += mirror[i++];
+		}
+//		console.log('end',row,'up  ',up)
+//		console.log('end',row,'down',down)
+		if(onesmudge(up,down)) {
+			symmetrical = true;
+			result += row * multiplier
+			break
+		}
+		row++
+	}
+	return symmetrical;
+}
+
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	let pattern = 0;
+	let mirrors = [];
+	
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		mirrors[pattern] = [];
+		allLines.forEach((line) => {
+			if('' == line.trim()) {
+				pattern++
+				mirrors[pattern] = [];
+			}
+			else {
+				mirrors[pattern].push(line)
+			}
+		});
+		
+		mirrors.forEach((mirror,index) => {
+			let symmetrical = findReflection(mirror,100,index);
+			if(!symmetrical) {
+				let rirrom = transpose(mirror)
+				symmetrical = findReflection(rirrom,1,index);
+			}
+		})
+		
+		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
