@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div{float:left}
+	table {border:1px solid black}
+</style>
+<script>
+
+var result = 0;
+const rocks = [];
+var height;
+var width;
+
+
+const tilt = direction => {
+//	console.log('tilt',direction)
+	let colSum = 0
+	switch(direction) {
+		case 'N':
+			for(let i=0;i<width;i++) {
+				let col = rocks.filter(r => r.y==i)
+				col.sort((a,b) => {
+					return a.x == b.x ? a.y - b.y : a.x - b.x
+				})
+				let j = 0 
+				col.forEach((r, index) => {
+					if('#' == r.v) {
+						j = r.x + 1;
+					}
+					else {
+						r.x = j++
+					}
+			    })
+			}
+			break
+		case 'W':
+			for(let i=0;i<height;i++) {
+				let row = rocks.filter(r => r.x==i)
+				row.sort((a,b) => {
+					return a.y == b.y ? a.x - b.x : a.y - b.y;
+				})
+				let j = 0 
+				row.forEach((r, index) => {
+					if('#' == r.v) {
+						j = r.y + 1;
+					}
+					else {
+						r.y = j++
+					}
+			    })
+			}
+			break;
+		case 'S':
+			for(let i=0;i<width;i++) {
+				let col = rocks.filter(r => r.y==i)
+				col.sort((a,b) => {
+					return a.x == b.x ? a.y - b.y : a.x - b.x
+				})
+				let j = height - 1 
+				for(let k=col.length-1;k>=0;k--) {
+					let r = col[k]
+					if('#' == r.v) {
+						j = r.x - 1;
+					}
+					else {
+						r.x = j--
+					}				
+			    }
+			}
+			break;
+		case 'E':
+			for(let i=0;i<height;i++) {
+				let row = rocks.filter(r => r.x==i)
+				row.sort((a,b) => {
+					return a.y == b.y ? a.x - b.x : a.y - b.y;
+				})
+				let j = width - 1 
+				for(let k=row.length-1;k>=0;k--) {
+					let r = row[k]
+					if('#' == r.v) {
+						j = r.y - 1;
+					}
+					else {
+						r.y = j--
+					}				
+			    }
+			}
+			break;
+		default : console.log('Oops')
+	}
+}
+function drawDish(grid) {
+	let tableString = '<table>'
+	for(let i=0;i<height;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<width;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+grid+'_'+i+'_'+j+'"';
+			tableString += '>'
+			tableString += '.'
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	
+	var iDiv = document.createElement('div');
+	iDiv.id = 'dish_'+grid;
+	document.getElementsByTagName('body')[0].appendChild(iDiv);
+	
+	document.getElementById('dish_'+grid).innerHTML = tableString;
+	
+	rocks.forEach(rock => {
+		document.getElementById('td_'+grid+'_'+rock.x+'_'+rock.y).innerHTML = rock.v
+	})
+
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		allLines.forEach((line, row) => line.split('')
+			.forEach((ch, col) => {
+		        if(ch != '.') {
+		            rocks.push({x:row, y:col,v:ch})
+		        }
+		    }))
+
+		height = allLines.length;
+		width = allLines[0].length;
+		
+		const spinStates = new Map();
+		let lastSeen = 0;
+		let interval = 0;
+					
+    	for(let n=0;n<1000;n++) {
+			tilt('N')
+			tilt('W')
+			tilt('S')
+			tilt('E')
+			
+  			console.log(rocks)
+			let rockString = rocks.reduce((acc,curr) => ('O' == curr.v) ? acc + 'x'+curr.x+'y'+curr.y:acc + '','')
+   			console.log(rockString)
+			
+			if('' != rockString) {
+				if(!spinStates.has(rockString)) {
+					spinStates.set(rockString,n)
+				}
+				else {
+					lastSeen = spinStates.get(rockString)
+					interval = n - lastSeen
+					let remaining = 1000000000 - 1 - n;
+	    			let remainingMod = remaining % interval;
+					alert('Found it '+ n+' '+ lastSeen + ' need ' + remainingMod + ' cycles')
+					spinStates.clear()
+	    			console.log(n)
+				}
+			}
+		}
+		console.log(lastSeen)
+		for(let i=0;i<height;i++) {
+			let col = rocks.filter(r => r.y==i)
+		    result += col.reduce((acc,current) => {
+				return acc += ('O' == current.v) ? height - current.x : 0
+			},0)
+		}
+ 		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="dish"></div>
+</body>
+</html>
