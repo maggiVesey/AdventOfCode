@@ -45,13 +45,8 @@ function aocFunction(input) {
 		let perimeter = 0
 
 		digPlan.forEach(digPlanLine => {
-			switch(digPlanLine.direction) {
-				case 'R': travel = [1, 0]; break
-				case 'D': travel = [0, 1]; break
-				case 'L': travel = [-1, 0]; break
-				case 'U': travel = [0, -1]; break
-				default: console.log('Oops!')
-			}
+			travel = DIR[digPlanLine.direction]
+
 			currentX = currentX+travel[0]*digPlanLine.distance
 			currentY = currentY+travel[1]*digPlanLine.distance
 
