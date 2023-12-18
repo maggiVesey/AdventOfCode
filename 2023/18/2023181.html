@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+const digPlan = [];
+const trench = [];
+
+const DIR = {
+  R: [1, 0],
+  U: [0, -1],
+  L: [-1, 0],
+  D: [0, 1],
+};
+  
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+
+		const digPlan = allLines
+			.map(line => line.split(/\s/))
+			.map(([direction,distance,edgeColor]) => ({direction:direction,distance:Number(distance),edgeColor:edgeColor.slice(1,-1)}));
+
+//		console.log(digPlan)	
+		let currentX = 0
+		let currentY = 0
+		let perimeter = 0
+
+		digPlan.forEach(digPlanLine => {
+			switch(digPlanLine.direction) {
+				case 'R': travel = DIR.R; break
+				case 'D': travel = DIR.D; break
+				case 'L': travel = DIR.L; break
+				case 'U': travel = DIR.U; break
+				default: console.log('Oops!')
+			}
+			currentX = currentX+travel[0]*digPlanLine.distance
+			currentY = currentY+travel[1]*digPlanLine.distance
+
+			trench.push([currentX,currentY])
+	
+			perimeter += digPlanLine.distance;
+		})
+//		console.log(trench)	
+		
+		// Pick's theorem
+		let area = 0
+		for(let i=0;i<trench.length;i++) {
+			area +=
+				((trench[i][1] + trench[(i + 1) % trench.length][1]) *
+				 (trench[i][0] - trench[(i + 1) % trench.length][0])) 
+				 / 2;
+		}
+	
+		result = area + perimeter / 2 + 1;
+ 		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
