@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+var result = 0;
+const workflows = new Map()
+const parts = []
+  
+const partCategory = {
+  x: 0,
+  m: 1,
+  a: 2,
+  s: 3,
+};
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+
+		let getParts = false;
+		allLines.forEach((line) => {
+			if(''==line) {
+				getParts = true
+			}
+			else if(!getParts) {
+				let workflow = line.split('{');
+				workflows.set(workflow[0],workflow[1].slice(0,-1).split(','))
+			}
+			else  {
+				parts.push(line.match(/\d+/g))
+			}
+		});
+
+//		console.log(workflows)
+//		console.log(parts)
+
+		parts.forEach(part => {
+			let newPath = 'in'
+			while('R' != newPath && 'A' != newPath) {
+				let workflow = workflows.get(newPath);
+				for(let i=0;i<workflow.length;i++) {
+					if(i==workflow.length - 1) {
+						newPath = workflow[i];
+						break;
+					}
+					let category = workflow[i].slice(0,1);
+					let rule = workflow[i].split(':')
+					let operator = rule[0].slice(1,2)
+					let condition = rule[0].slice(2)
+					if('<' == operator) {
+						if(parseInt(part[partCategory[category]]) < parseInt(condition)) {
+							newPath = rule[1];
+							break
+						}
+					}
+					else if('>' == operator) {
+						if(parseInt(part[partCategory[category]]) > parseInt(condition)) {
+							newPath = rule[1];
+							break
+						}
+					}
+					else {
+						console.log('Unknown operator',operator,workflow[i],part)
+					}
+				}
+			}
+			if('A' == newPath) {
+				result += parseInt(part[0]) + parseInt(part[1]) + parseInt(part[2]) + parseInt(part[3])
+			}
+		})
+ 		document.getElementById('result').append(result);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
