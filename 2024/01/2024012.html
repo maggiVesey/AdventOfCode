@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+const locations1 = [];
+const locations2 = [];
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		allLines.forEach((locationsLine) => {
+			let locations = locationsLine.split(/\s+/);
+			locations1.push(parseInt(locations[0],10))
+			locations2.push(parseInt(locations[1],10))
+ 		});
+		
+		const locationCount = {};
+		for (const locations of locations2) {
+			locationCount[locations] = (locationCount[locations] || 0) + 1
+		}
+		
+		for(let i=0;i<locations1.length;i++) {
+			result += locations1[i]*(locationCount[locations1[i]]||0)
+		}
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
