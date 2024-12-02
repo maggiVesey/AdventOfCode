@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function safeLevel(thisReport) {
+	let safe = false;
+	let ascending = false;
+	
+	for(let i=1;i<thisReport.length;i++) {
+		let step = thisReport[i] - thisReport[i-1];
+		if(i==1) {
+			ascending = step > 0;
+		}	
+		safe = (ascending == step > 0) && Math.abs(step) > 0 && Math.abs(step) <= 3
+		if(!safe) {
+			break;
+		}
+	}
+	return safe;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		allLines.forEach((reportLine) => {
+			let report = reportLine.split(/\s+/).map(Number);
+			
+			if(safeLevel(report)) {
+				result++;
+			}
+			else {
+				let safeCount = 0;
+				for(let i=0;i<report.length;i++) {
+					let tempLine = report.toSpliced(i,1)
+					if(safeLevel(tempLine)) {
+						safeCount++;
+					}
+					if(safeCount > 2) {
+						break;
+					}
+				}
+				if(safeCount>0) {
+					result++;
+				}
+			}
+		});
+		
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
