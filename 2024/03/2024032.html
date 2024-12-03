@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		let result = 0;
+		let doInstruction = true;
+
+		let instructions = file.match(/mul\(\d+,\d+\)|don't\(\)|do\(\)/g);
+
+		instructions.forEach((instruction) => {
+			if(instruction == "don't()") {
+				doInstruction = false;
+			}
+			if(instruction == 'do()') {
+				doInstruction = true;
+			}
+			if(doInstruction && instruction.startsWith('mul')) {
+				let multiplicands = instruction.match(/\d+/g).map(Number);
+				result += multiplicands[0]*multiplicands[1];
+			}
+		});
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
