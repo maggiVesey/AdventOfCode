@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+const ordering = [];
+const updates = [];
+
+function rightOrder(update) {
+	let rightOrder = true;
+	for(const [before,after] of ordering) {
+		if(update.indexOf(before) < 0 || update.indexOf(after) < 0) {
+			continue;
+		}
+		if(update.indexOf(after) < update.indexOf(before)) {
+			rightOrder = false;
+		}
+	}
+	return rightOrder;
+}
+function compareFn(a, b) {
+	if(ordering.find((order) => order[0] == a && order[1] == b)) {
+		return -1
+	}
+	if(ordering.find((order) => order[0] == b && order[1] == a)) {
+		return 1
+	}
+	return 0;
+}
+const midNumber = correctUpdate =>  correctUpdate[(correctUpdate.length - 1)/2];
+
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		allLines.forEach((reportLine) => {
+			if(reportLine.includes('|')) {
+				ordering.push(reportLine.split('|').map(Number))
+			}
+			if(reportLine.includes(',')) {
+				updates.push(reportLine.split(',').map(Number))
+			}
+		});
+
+		let incorrectUpdates = updates.filter((r) => !rightOrder(r));
+		incorrectUpdates.forEach((incorrectUpdate) => {
+			incorrectUpdate.sort(compareFn)
+		})
+		result = incorrectUpdates.map(midNumber).reduce((a,b) => a+b);
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
