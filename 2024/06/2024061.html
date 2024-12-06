@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+const UP = 0;
+const RIGHT = 1;
+const DOWN = 2;
+const LEFT = 3;
+
+const labMap = [];
+const visitedPositions = [];
+
+const uniqueArray = a => [...new Set(a.map(o => JSON.stringify(o)))].map(s => JSON.parse(s))
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let facing = UP;
+		let guardPosition = [];
+		let outOfMap = false;
+
+		allLines.forEach((reportLine) => {
+			if(reportLine.indexOf('^') > 0) {
+				guardPosition = [labMap.length, reportLine.indexOf('^')]
+				visitedPositions.push({x:guardPosition[0],y:guardPosition[1]})
+			}
+			labMap.push(reportLine.split(''))
+		});
+		
+		let count = 0
+
+		while(!outOfMap && count < 9999) {
+			count++
+			let newX = guardPosition[0] 
+			let newY = guardPosition[1] 
+			
+			if(facing == UP) {
+				newX--
+			}
+			if(facing == RIGHT) {
+				newY++
+			}
+			if(facing == DOWN) {
+				newX++
+			}
+			if(facing == LEFT) {
+				newY--
+			}
+			
+			if(newX  < 0 || newY < 0 || newX >= labMap[0].length || newY >= labMap.length) {
+				outOfMap = true;
+			}
+			else if(labMap[newX][newY] != '#') {
+				guardPosition[0] = newX
+				guardPosition[1] = newY
+				visitedPositions.push({x:guardPosition[0],y:guardPosition[1]})
+			}
+			else {
+				facing = (facing + 1) % 4;
+			}
+		}
+
+		console.log(count)
+		result = uniqueArray(visitedPositions).length;
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
