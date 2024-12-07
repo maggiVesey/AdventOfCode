@@ -11,9 +11,9 @@ function targetFound(runningTotal,target,factors) {
 	if(runningTotal > target) {
 		return false;
 	}
-	let firstFactor = factors.shift();
-	let add = targetFound(runningTotal + firstFactor, target, [...factors])
-  	let multiply = targetFound((runningTotal != 0 ? runningTotal : 1) * firstFactor, target, [...factors]);
+	let nextFactor = factors.shift();
+	let add = targetFound(runningTotal + nextFactor, target, [...factors])
+  	let multiply = targetFound((runningTotal != 0 ? runningTotal : 1) * nextFactor, target, [...factors]);
   	return add || multiply;
 }
 function aocFunction(input) {
