@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function targetFound(runningTotal,target,factors) {
+	if(0 == factors.length) {
+		return runningTotal == target;
+	}
+	if(runningTotal > target) {
+		return false;
+	}
+	let firstFactor = factors.shift();
+	let add = targetFound(runningTotal + firstFactor, target, [...factors])
+  	let multiply = targetFound((runningTotal != 0 ? runningTotal : 1) * firstFactor, target, [...factors]);
+	let concatenate = targetFound(Number(''.concat(runningTotal,firstFactor)), target, [...factors])
+  	return add || multiply || concatenate;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		allLines.forEach((line) => {
+			let parts = line.split(/:/);
+			let target = parseInt(parts[0],10)
+			let factors = parts[1].trim().split(/\s+/).map(Number)
+			
+			if(targetFound(0,target,factors)) {
+				result += target;
+			}
+		});
+		
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
