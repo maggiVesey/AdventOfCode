@@ -11,15 +11,11 @@ function aocFunction(input) {
 
 	reader.onload = (event) => {
 		const file = event.target.result;
-		const allLines = file.split(/\r\n|\n/);
 
 		let result = 0;
-		let stones = [];
 		const blinks = 25
 
-		allLines.forEach((stonesLine) => {
-			stones = stonesLine.split(/\s/).map(Number);
-		});
+		let stones = file.split(/\s/).map(Number);
 		
 		for(let b=1;b<=blinks;b++) {
 			let stonesList = [...stones]
