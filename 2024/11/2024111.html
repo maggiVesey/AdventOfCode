@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let stones = [];
+		const blinks = 25
+
+		allLines.forEach((stonesLine) => {
+			stones = stonesLine.split(/\s/).map(Number);
+		});
+		
+		for(let b=1;b<=blinks;b++) {
+			let stonesList = [...stones]
+			let currentStone = 0
+			
+			for(let i=0;i<stonesList.length;i++) {
+				let stoneStr = '' + stonesList[i]
+				if(0 == stonesList[i]) {
+					stones[currentStone++] = 1
+				}
+				else if(0 == stoneStr.length % 2) {
+					stones[currentStone++] = parseInt(stoneStr.substring(0,Math.floor(stoneStr.length / 2)),10)
+					stones.splice(currentStone++, 0, parseInt(stoneStr.substring(Math.floor(stoneStr.length / 2)),10));
+	
+				}
+				else {
+					stones[currentStone] = stones[currentStone] * 2024
+					currentStone++
+				}
+			}
+		}
+		console.log(stones)
+		document.getElementById('result').value = stones.length;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
