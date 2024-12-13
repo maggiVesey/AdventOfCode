@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+const machines = [];
+const costA = 3;
+const costB = 1;
+const unitError = 10000000000000
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let buttonA = []
+		let buttonB = []
+		let prize = []
+				
+		allLines.forEach((line) => {
+			if(line.startsWith('Button A: ')) {
+				buttonA = line.match(/\d+/g).map(Number)
+			}
+			if(line.startsWith('Button B: ')) {
+				buttonB = line.match(/\d+/g).map(Number)
+			}
+			if(line.startsWith('Prize: ')) {
+				prize = line.match(/\d+/g).map(Number).map(p => p+unitError)
+				machines.push({
+					A: {x:buttonA[0], y:buttonA[1]},
+					B: {x:buttonB[0], y:buttonB[1]},
+					Prize: {x:prize[0], y:prize[1]},
+					tokens: 0
+				})
+			}
+		});
+		machines.forEach((machine) => {
+			let denom = (machine.A.x * machine.B.y) - (machine.A.y * machine.B.x)
+			let pressesA = ((machine.Prize.x * machine.B.y) - (machine.Prize.y * machine.B.x)) / denom
+			let pressesB = ((machine.Prize.y * machine.A.x) - (machine.Prize.x * machine.A.y)) / denom
+			
+			if(Number.isInteger(pressesA) && Number.isInteger(pressesB)) {
+				machine.tokens = (costA * pressesA) + (costB * pressesB) 
+			}
+		}) 
+
+		document.getElementById('result').value = machines.reduce((a,b) => a + b.tokens,0);
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
