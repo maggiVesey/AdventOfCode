@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:50%;
+	}
+</style>
+<script>
+
+const tiles = [];
+const robots = [];
+const width = 101;
+const height = 103;
+
+function initTiles() {
+	for(let i=0;i<height;i++) {
+		tiles[i] = []
+		for(let j=0;j<width;j++) {
+			tiles[i][j] = '.'
+		}
+	}
+}
+function drawTiles() {
+	let tableString = '<table>'
+	for(let i=0;i<height;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<width;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+i+'_'+j+'"';
+			tableString += '>'
+			tableString += tiles[i][j]
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("tiles").innerHTML = tableString;
+}
+function pictureDetected() {
+	return (null!=tiles.map(arr => arr.join('')).join('').match('1111111'))
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		initTiles()
+		allLines.forEach((robotLine) => {
+			let robotData = robotLine.split(/\s/)
+			let robotPosition = robotData[0].substring(2).split(',').map(Number)
+			let robotVelocity = robotData[1].substring(2).split(',').map(Number)
+			robots.push({
+				position: {x:robotPosition[0], y:robotPosition[1]},
+				velocity: {x:robotVelocity[0], y:robotVelocity[1]}
+			})
+		})
+		for(let i = 1;i <= width * height; i++) {
+			
+			initTiles()
+			
+			robots.forEach((robot) => {
+				let finalX = (robot.position.x + (i * robot.velocity.x))  % width
+				let finalY = (robot.position.y + (i * robot.velocity.y))  % height
+				
+				if(finalX < 0) {
+					finalX = width + finalX
+				}
+				if(finalY < 0) {
+					finalY = height + finalY
+				}
+	//			console.log(finalX,finalY)
+				if ('.'==tiles[finalY][finalX]) {
+					tiles[finalY][finalX] = 0
+				}
+				tiles[finalY][finalX]++
+			})
+			if (pictureDetected()) {
+				result = i;
+				break;
+			}
+		};
+		drawTiles();
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="tiles"></div>
+</body>
+</html>

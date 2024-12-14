@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+
+const tiles = [];
+const width = 101;
+const height = 103;
+const time = 100;
+
+function initTiles() {
+	for(let i=0;i<height;i++) {
+		tiles[i] = []
+		for(let j=0;j<width;j++) {
+			tiles[i][j] = '.'
+		}
+	}
+}
+function drawTiles() {
+	let tableString = '<table>'
+	for(let i=0;i<height;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<width;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+i+'_'+j+'"';
+			tableString += '>'
+			tableString += tiles[i][j]
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("tiles").innerHTML = tableString;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		initTiles()
+		allLines.forEach((robotLine) => {
+			let robotData = robotLine.split(/\s/)
+			let robotPosition = robotData[0].substring(2).split(',').map(Number)
+			let robotVelocity = robotData[1].substring(2).split(',').map(Number)
+
+			let finalX = (robotPosition[0] + (time * robotVelocity[0]))  % width
+			let finalY = (robotPosition[1] + (time * robotVelocity[1]))  % height
+			
+			if(finalX < 0) {
+				finalX = width + finalX
+			}
+			if(finalY < 0) {
+				finalY = height + finalY
+			}
+			if ('.'==tiles[finalY][finalX]) {
+				tiles[finalY][finalX] = 0
+			}
+			tiles[finalY][finalX]++
+		});
+
+		let quadrants1 = 0
+		let quadrants2 = 0
+		let quadrants3 = 0
+		let quadrants4 = 0
+		for(let i=0;i<Math.floor(height/2);i++) {
+			for(let j=0;j<Math.floor(width/2);j++) {
+				quadrants1 += ('.'==tiles[i][j]) ? 0 : tiles[i][j]
+			}
+		}
+		for(let i=0;i<Math.floor(height/2);i++) {
+			for(let j=Math.floor(width/2) + 1;j<width;j++) {
+				quadrants2 += ('.'==tiles[i][j]) ? 0 : tiles[i][j]
+			}
+		}
+		for(let i=Math.floor(height/2) + 1;i<height;i++) {
+			for(let j=0;j<Math.floor(width/2);j++) {
+				quadrants3 += ('.'==tiles[i][j]) ? 0 : tiles[i][j]
+			}
+		}
+		for(let i=Math.floor(height/2) + 1;i<height;i++) {
+			for(let j=Math.floor(width/2) + 1;j<width;j++) {
+				quadrants4 += ('.'==tiles[i][j]) ? 0 : tiles[i][j]
+			}
+		}
+		document.getElementById('result').value = quadrants1 * quadrants2 * quadrants3 * quadrants4;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="tiles"></div>
+</body>
+</html>
