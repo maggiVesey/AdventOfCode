@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:50%;
+	}
+</style>
+<script>
+const warehouse = []
+
+function drawWarehouse() {
+	let tableString = '<table>'
+	for(let i=0;i<warehouse.length;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<warehouse[i].length;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+i+'_'+j+'"';
+			tableString += '>'
+			tableString += warehouse[i][j]
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("tiles").innerHTML = tableString;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let movementLine = ''
+		let robotPosition = {}
+		
+
+		allLines.forEach((line) => {
+			if(line.indexOf('@') > -1) {
+				robotPosition = {x:warehouse.length, y:line.indexOf('@')}
+			}
+			if(line.indexOf('#') > -1) {
+				warehouse.push(line.split(''))
+			}
+			else {
+				movementLine += line
+			}
+		});
+		
+		let movements = movementLine.split('')
+
+		while(movements.length != 0) {
+			let nextMove = movements.shift();
+			let steps = 0;
+			switch(nextMove) {
+				case '^':
+					steps = 1;
+					while(robotPosition.x - steps >= 0) {
+						if('#' == warehouse[robotPosition.x - steps][robotPosition.y]) {
+							break;
+						}
+						if('O' == warehouse[robotPosition.x - steps][robotPosition.y]) {
+							steps++
+							continue;
+						}
+						if('.' == warehouse[robotPosition.x - steps][robotPosition.y]) {
+							while(steps >0) {
+								warehouse[robotPosition.x - steps][robotPosition.y] = warehouse[robotPosition.x - steps + 1][robotPosition.y]
+								steps--
+							}
+							warehouse[robotPosition.x][robotPosition.y] = '.'
+							robotPosition.x--
+							break;
+						}
+					}
+					break
+				case '>':
+					steps = 1;
+					while(robotPosition.y + steps < warehouse[0].length) {
+						if('#' == warehouse[robotPosition.x][robotPosition.y + steps]) {
+							break;
+						}
+						if('O' == warehouse[robotPosition.x][robotPosition.y + steps]) {
+							steps++
+							continue;
+						}
+						if('.' == warehouse[robotPosition.x][robotPosition.y + steps]) {
+							while(steps > 0) {
+								warehouse[robotPosition.x][robotPosition.y + steps] = warehouse[robotPosition.x][robotPosition.y + steps - 1]
+								steps--
+							}
+							warehouse[robotPosition.x][robotPosition.y] = '.'
+							robotPosition.y++
+							break;
+						}
+					}
+					break
+				case 'v':
+					steps = 1;
+					while(robotPosition.x + steps < warehouse.length) {
+						if('#' == warehouse[robotPosition.x + steps][robotPosition.y]) {
+							break;
+						}
+						if('O' == warehouse[robotPosition.x + steps][robotPosition.y]) {
+							steps++
+							continue;
+						}
+						if('.' == warehouse[robotPosition.x + steps][robotPosition.y]) {
+							while(steps >0) {
+								warehouse[robotPosition.x + steps][robotPosition.y] = warehouse[robotPosition.x + steps - 1][robotPosition.y]
+								steps--
+							}
+							warehouse[robotPosition.x][robotPosition.y] = '.'
+							robotPosition.x++
+							break;
+						}
+					}
+				break
+					case '<':
+					steps = 1;
+					while(robotPosition.y - steps >= 0) {
+						if('#' == warehouse[robotPosition.x][robotPosition.y - steps]) {
+							break;
+						}
+						if('O' == warehouse[robotPosition.x][robotPosition.y - steps]) {
+							steps++
+							continue;
+						}
+						if('.' == warehouse[robotPosition.x][robotPosition.y - steps]) {
+							while(steps >0) {
+								warehouse[robotPosition.x][robotPosition.y - steps] = warehouse[robotPosition.x][robotPosition.y - steps + 1]
+								steps--
+							}
+							warehouse[robotPosition.x][robotPosition.y] = '.'
+							robotPosition.y--
+							break;
+						}
+					}
+					break
+			}
+		}
+		drawWarehouse()
+		for(let i=1;i<warehouse.length-1;i++) {
+			for(let j=1;j<warehouse[i].length-1;j++) {
+				if('O' == warehouse[i][j]) {
+					result += (100 * i) + j
+				}
+			}
+		}
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="tiles"></div>
+</body>
+</html>
