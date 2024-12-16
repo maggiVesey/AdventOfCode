@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:50%;
+	}
+</style>
+<script>
+
+const UP    = [-1,0]
+const RIGHT = [0,1]
+const DOWN  = [1,0]
+const LEFT  = [0,-1]
+
+const DIRS = [RIGHT,DOWN,LEFT,UP];
+
+const maze = []
+
+const uniqueArray = a => [...new Set(a.map(o => JSON.stringify(o)))].map(s => JSON.parse(s))
+
+
+const findAllMinPaths = (start, end) => {
+	
+    let stack = [{position: start, path: [], cost: 0}]
+    let currentPosition = {}
+    let visitedCost = {} 
+    let paths = []
+    
+    let minCost = Infinity;
+    
+    while (currentPosition = stack.shift()) {
+		
+        currentPosition.path.push(currentPosition.position.x+'_'+currentPosition.position.y);
+        
+        if (currentPosition.position.x == end.x && currentPosition.position.y == end.y) {
+            if (currentPosition.cost < minCost) {
+                paths = [];
+                minCost = currentPosition.cost;
+            };
+            if (currentPosition.cost == minCost) {
+				paths.push(currentPosition.path);
+			}
+            continue;
+        }
+
+        let k = currentPosition.position.x + '_' + currentPosition.position.y + '_' + currentPosition.position.direction;
+        if (visitedCost[k] < currentPosition.cost) {
+			continue;
+		}
+        visitedCost[k] = currentPosition.cost;
+        if (currentPosition.cost > minCost) {
+			continue;
+		}
+		
+        let currentDirection = DIRS[currentPosition.position.direction];
+        
+        DIRS.forEach((direction, dirId) => {
+            if (direction[0] == -currentDirection[0] && direction[1] == -currentDirection[1])  {
+				return true; // no turns back
+			}
+            let position = {x:currentPosition.position.x + direction[0], 
+            				y: currentPosition.position.y + direction[1], 
+            				direction: dirId};
+            				
+            if (maze[position.x][position.y] == '#') {
+				return true;
+			}
+            stack.push({
+                path: currentPosition.path.slice(),
+                position: position,
+                cost: currentPosition.cost + (position.direction == currentPosition.position.direction ? 1 : 1001)
+            })
+        })
+    }
+    return paths;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let movementLine = ''
+		let start = {}
+		let end = {}  
+		
+		allLines.forEach((line) => {
+			if(line.indexOf('S') > -1) {
+				start = {x:maze.length, y:line.indexOf('S'), direction: 0}
+			}
+			if(line.indexOf('E') > -1) {
+				end = {x:maze.length, y:line.indexOf('E')}
+			}
+			maze.push(line.split(''))
+		});
+
+		document.getElementById('result').value = uniqueArray(findAllMinPaths(start, end).flat()).length;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="tiles"></div>
+</body>
+</html>
