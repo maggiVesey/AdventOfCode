@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+	
+const UP    = [-1,0]
+const RIGHT = [0,1]
+const DOWN  = [1,0]
+const LEFT  = [0,-1]
+
+const DIRS = [RIGHT,DOWN,LEFT,UP];
+
+const bytePositions = []
+
+const memorySpaceRows = 70;
+const memorySpaceCols = 70;
+
+const memorySpace = Array.from({length: memorySpaceCols + 1}, () => Array(memorySpaceRows + 1).fill('.'))
+
+const shortestPaths = (map, from) => {
+	
+    const offMap = (x, y) => x < 0 || y < 0 || x >= cols || y >= rows;
+
+    let cols = map[0].length;
+	let rows = map.length;
+
+	let currentPosition;
+	
+    let visited = map.map(row => row.slice().fill(Infinity))
+    
+    let  stack = [{
+            position: [...from],
+            distance: 0
+        }];
+
+    while (currentPosition = stack.shift()) {
+		
+        let [cx, cy] = currentPosition.position;
+
+        if (visited[cy][cx] <= currentPosition.distance) {
+			continue;
+		}
+        visited[cy][cx] = currentPosition.distance;
+
+        DIRS.forEach(([dx, dy]) => {
+            let [x, y] = [cx+dx, cy+dy];
+            if (offMap(x, y)) {
+				return true;
+			}
+            if ('#' == map[y][x]) {
+            	return true;
+            }
+            stack.push({
+                position: [x, y],
+                distance: currentPosition.distance + 1
+            })
+        })
+    }
+    return visited;
+}
+function drawMemorySpace() {
+	let tableString = '<table>'
+	for(let i=0;i<=memorySpaceRows;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<=memorySpaceCols;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+j+'_'+i+'"';
+			tableString += '>'
+			tableString += memorySpace[j][i]
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("memorySpace").innerHTML = tableString;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+			
+		allLines.forEach((line) => {
+			let bytes = line.split(',').map(Number)
+			bytePositions.push(bytes)
+		});
+		
+		let fallenBytes = 0
+		memorySpace[bytePositions[fallenBytes][0]][bytePositions[fallenBytes][1]] = '#'
+	    let paths = shortestPaths(memorySpace, [0,0]);
+	    
+		while (paths[memorySpaceCols][memorySpaceRows] < Infinity && fallenBytes <=bytePositions.length) {
+			fallenBytes++;
+			memorySpace[bytePositions[fallenBytes][0]][bytePositions[fallenBytes][1]] = '#'
+	    	paths = shortestPaths(memorySpace, [0,0]);
+		}
+		document.getElementById('result').value = bytePositions[fallenBytes--];
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="memorySpace"></div>
+</body>
+</html>
