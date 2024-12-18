@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+
+const nodes = new Map();
+const antinodes = [];
+
+let maxX = 0;
+let maxY = 0;
+
+const uniqueArray = a => [...new Set(a.map(o => JSON.stringify(o)))].map(s => JSON.parse(s))
+
+function drawNodes() {
+	let tableString = '<table>'
+	for(let i=0;i<=maxX;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<=maxY;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+i+'_'+j+'"';
+			tableString += '>'
+			tableString += '.'
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("nodes").innerHTML = tableString;
+
+	for (const [char, positions] of nodes) {
+		positions.forEach((position) => {
+			document.getElementById('td_'+position[0]+'_'+position[1]).innerText = char
+		}) 
+	}
+	for(const antinode of antinodes) {
+		document.getElementById('td_'+antinode[0]+'_'+antinode[1]).innerText = '#'
+	}
+}
+const calculateAntinodes = (nodePositions) => {
+	
+    const offMap = (x, y) => x < 0 || y < 0 || x > maxX || y > maxY;
+    
+	for(let i = 1; i < nodePositions.length; i++) {
+		for(let j=i -1; j >=0 ;j--) {
+			let dx = nodePositions[i][0] - nodePositions[j][0]
+			let dy = nodePositions[i][1] - nodePositions[j][1]
+			
+			let nodesAllowed1 = true
+			let nodesAllowed2 = true
+			let multiplier = 1
+			while(nodesAllowed1 || nodesAllowed2) {
+				
+				let newX1 = nodePositions[j][0] - (multiplier * dx)
+				let newY1 = nodePositions[j][1] - (multiplier * dy)
+		
+				let newX2 = nodePositions[i][0] + (multiplier * dx)
+				let newY2 = nodePositions[i][1] + (multiplier * dy)
+			
+				multiplier++
+
+				if(!offMap(newX1,newY1)) {
+					antinodes.push([newX1,newY1])
+				}
+				else {
+					nodesAllowed1 = false
+				}
+				if(!offMap(newX2,newY2)) {
+					antinodes.push([newX2,newY2])
+				}
+				else {
+					nodesAllowed2 = false
+				}
+			}
+		}
+	}
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+   		allLines.map((line, x) => {
+			maxX = (x >= maxX) ? x : maxX 
+           	line.split('').map((char, y) => {
+          		maxY = (y >= maxY) ? y :maxY 
+ 				if('.' != char) {
+					if(!nodes.has(char)) {
+						nodes.set(char,[])
+					}
+                  	nodes.get(char).push([x,y])
+                }
+            });
+        })
+		
+		for (const positions of nodes.values()) {
+			calculateAntinodes(positions)
+		}
+		drawNodes()
+		for (const positions of nodes.values()) {
+			calculateAntinodes(positions)
+		}
+		for (const positions of nodes.values()) {
+			antinodes.push(...positions)
+		}
+		document.getElementById('result').value = uniqueArray(antinodes).length;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="nodes"></div>
+</body>
+</html>
