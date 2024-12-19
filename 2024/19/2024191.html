@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+	
+function possibleDesign(stripes, patterns, memo = {}) {
+	if (0 == stripes.length) {
+		return true;
+	}
+    if (memo[stripes] !== undefined) {
+		return memo[stripes];
+	}
+	for (const pattern of patterns) {
+		if (stripes.startsWith(pattern)) {
+			if (possibleDesign(stripes.slice(pattern.length), patterns, memo)) {
+				memo[stripes] = true;
+				return true;
+			}
+		}
+	}
+	memo[stripes] = false;
+	return false;
+}
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+
+		let patterns = []
+		let designs = []
+
+		allLines.forEach((line) => {
+			if(0 == patterns.length) {
+				patterns = line.split(', ')
+			}
+			else {
+				if (''!= line) {
+					designs.push({stripes:line,possible:false});
+				}
+			}
+		});
+		for (const design of designs) {
+			design.possible = possibleDesign(design.stripes,patterns)
+		}
+		document.getElementById('result').value = designs.filter(d => d.possible).length;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
