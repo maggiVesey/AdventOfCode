@@ -78,27 +78,18 @@ const leastCostPath = (start, end) => {
     }
     return {minCost:minCost,visitedCost:visitedCost};
 }
-const getCheats = () => {
+const getCheats = (pathArray) => {
 	let cheats = {}
-	for(let i=0;i<racetrack.length;i++) {
-		for(let j=0;j<racetrack[i].length;j++) {
-//			if('.' == racetrack[i][j]) { // never happened
-//				console.log('track at ',i,j) 
-//			}
-			if(j<racetrack[i].length - 2) {
-				if('#' != racetrack[i][j] && '#' == racetrack[i][j + 1] && '#' != racetrack[i][j + 2]) { 
-					let picosecondsSaved = Math.abs(racetrack[i][j + 2] - racetrack[i][j]) - 2
-//					console.log('gap at ',i,j, 'saves', picosecondsSaved) 
-					cheats[picosecondsSaved] = cheats[picosecondsSaved] + 1 || 1;
-				}
+	for(let i=0;i<pathArray.length;i++) {
+		for(let j=i+1;j<pathArray.length;j++) {
+			
+			let mahattanDistance = Math.abs(pathArray[j].x - pathArray[i].x) + Math.abs(pathArray[j].y - pathArray[i].y)
+			
+			if(2 == mahattanDistance) {
+				let picosecondsSaved = Math.abs(j - i) - 2
+				cheats[picosecondsSaved] = cheats[picosecondsSaved] + 1 || 1;
 			}
-			if(i<racetrack.length - 2) {
-				if('#' != racetrack[i][j] && '#' == racetrack[i + 1][j] && '#' != racetrack[i + 2][j]) { 
-					let picosecondsSaved = Math.abs(racetrack[i + 2][j] - racetrack[i][j]) - 2
-//					console.log('gap at ',i,j, 'saves', picosecondsSaved)
-					cheats[picosecondsSaved] = cheats[picosecondsSaved] + 1 || 1;
-				}
-			}
+			
 		}
 	}
 	return cheats
@@ -129,16 +120,18 @@ function aocFunction(input) {
 		let path = leastCostPath(start,end)
 		let steps = path.minCost
 		let racePath = path.visitedCost
+		let pathArray = []
 		
 		for (const [position, step] of Object.entries(racePath)) {
 			let pos = position.split('_')
 			racetrack[pos[0]][pos[1]] = step
+			pathArray.push({x:parseInt(pos[0],10),y:parseInt(pos[1],10)})
 		}
 		racetrack[end.x][end.y] = steps
-		drawRacetrack()
+		pathArray.push({x:end.x,y:end.y})
+//		drawRacetrack()
 		
-		for (const [picoseconds, cheatCount] of Object.entries(getCheats())) {
-			console.log(picoseconds, cheatCount)
+		for (const [picoseconds, cheatCount] of Object.entries(getCheats(pathArray))) {
 			if(picoseconds >= 100) {
 				result = result + cheatCount
 			}
