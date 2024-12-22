@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+
+const mix = (mixer,secret) => {
+	return mixer ^ secret;
+}
+const prune = (secret) => {
+	return secret % BigInt(16777216);
+}
+const lastDigit = (bigNumber) => {
+	let interim = bigNumber.toString(10)
+	return parseInt(interim.charAt(interim.length - 1),10)
+}
+const calculateSecret = (secret) => {
+	let interim = prune(mix(secret * BigInt(64),secret))
+	interim = prune(mix(interim / BigInt(32),interim))
+	interim = prune(mix(interim * BigInt(2048),interim))
+	return interim
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let generations = 2000
+		let secretNumbers = []
+		
+		allLines.forEach((secretNumber) => {
+			let interim = BigInt(secretNumber);
+			let bananas = []
+			bananas.push({price:lastDigit(interim),priceChanges:[]})
+			for(let i=0;i<generations;i++) {
+				interim = calculateSecret(interim)
+				bananas.push({price:lastDigit(interim),priceChanges:[]})
+//				console.log(i,interim)
+			}
+			secretNumbers.push({original:secretNumber,outcome:interim,bananas:bananas,sequences:{}})
+		});
+
+		console.log('secretNumbers',secretNumbers)
+		
+		let possibleWinningSequences = {}
+		secretNumbers.forEach((secretNumber) => {
+			for(let i=4;i<secretNumber.bananas.length;i++) {
+				secretNumber.bananas[i].priceChanges.push(secretNumber.bananas[i-3].price - secretNumber.bananas[i-4].price)
+				secretNumber.bananas[i].priceChanges.push(secretNumber.bananas[i-2].price - secretNumber.bananas[i-3].price)
+				secretNumber.bananas[i].priceChanges.push(secretNumber.bananas[i-1].price - secretNumber.bananas[i-2].price)
+				secretNumber.bananas[i].priceChanges.push(secretNumber.bananas[i-0].price - secretNumber.bananas[i-1].price)
+				
+				if(undefined == secretNumber.sequences[secretNumber.bananas[i].priceChanges.join()]) {
+					secretNumber.sequences[secretNumber.bananas[i].priceChanges.join()] = secretNumber.bananas[i-0].price
+				}
+			}
+			for (const [sequence, price] of Object.entries(secretNumber.sequences)) {
+				if(undefined == possibleWinningSequences[sequence]) {
+					possibleWinningSequences[sequence] = 0
+				}
+				possibleWinningSequences[sequence] += price
+			}
+		})
+		console.log('possibleWinningSequences',possibleWinningSequences)
+/*		
+//		let winningSequence = [-2,1,-1,3]
+		secretNumbers.forEach((secretNumber) => {
+			for(let i=4;i<secretNumber.bananas.length;i++) {
+				if(winningSequence.join() == secretNumber.bananas[i].priceChanges.join()) {
+					result += secretNumber.bananas[i].price
+					break;
+				}
+			}
+		})
+*/
+		for (const [sequence,price] of Object.entries(possibleWinningSequences)) {
+			if(price > result) {
+				console.log('winner',sequence)
+				result = price
+			}
+		}
+
+		console.log('complete')
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="racetrack"></div>
+</body>
+</html>
