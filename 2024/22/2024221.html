@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+
+const mix = (mixer,secret) => {
+	return mixer ^ secret;
+}
+const prune = (secret) => {
+	return secret % BigInt(16777216);
+}
+const calculateSecret = (secret) => {
+	let interim = prune(mix(secret * BigInt(64),secret))
+	interim = prune(mix(interim / BigInt(32),interim))
+	interim = prune(mix(interim * BigInt(2048),interim))
+	return interim
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let generations = 2000
+		let secretNumbers = []
+		
+		allLines.forEach((secretNumber) => {
+			let interim = BigInt(secretNumber);
+			for(let i=0;i<generations;i++) {
+				interim = calculateSecret(interim)
+//				console.log(i,interim)
+			}
+			secretNumbers.push({original:secretNumber,outcome:interim})
+		});
+
+		console.log(secretNumbers)
+		
+		document.getElementById('result').value = secretNumbers.reduce((a,b) => a + b.outcome,BigInt(0));
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="racetrack"></div>
+</body>
+</html>
