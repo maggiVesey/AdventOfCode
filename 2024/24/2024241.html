@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+
+const anyNullZs = (wires) => {	
+	for (const wire in wires) {
+		if (wire.startsWith("z") && null == wires[wire]) {
+			return true
+		}
+	}
+	return false	
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let wires = {};
+		let gates = []
+		
+		allLines.forEach((line) => {
+			if(line.includes(':')) {
+				let wireValues = line.split(': ');
+				wires[wireValues[0]] = parseInt(wireValues[1],10)
+			}
+			if(line.includes('->')) {
+				let gateValues = line.split(' ');
+				let gate = {input1:gateValues[0],input2:gateValues[2],operator:gateValues[1],output:gateValues[4]}
+				if(undefined == wires[gate.input1]) {
+					wires[gate.input1] = null
+				}
+				if(undefined == wires[gate.input2]) {
+					wires[gate.input2] = null
+				}
+				if(undefined == wires[gate.output]) {
+					wires[gate.output] = null
+				}
+				gates.push(gate)
+			}
+		});
+
+		let count = 0
+		do {
+			gates.forEach((gate) => {
+				if(null == wires[gate.output] && null != wires[gate.input1] && null != wires[gate.input2]) {
+					switch (gate.operator) {
+						case 'AND':
+							wires[gate.output] = wires[gate.input1] & wires[gate.input2]
+							break
+						case 'OR':
+							wires[gate.output] = wires[gate.input1] | wires[gate.input2]
+						break
+						case 'XOR':
+							wires[gate.output] = wires[gate.input1] ^ wires[gate.input2]
+							break
+						default: 
+							console.log('Oops!')
+					}
+				}
+			})
+			count++
+		} while (anyNullZs(wires) && count < 1000)
+		console.log(wires)
+		
+		let zs = []
+		for (const wire in wires) {
+			if (wire.startsWith("z")) {
+				zs.push([wire, wires[wire].toString()]);
+			}
+		}
+		result = parseInt(zs
+			.sort((a,b) => parseInt(b[0].substring(1),10) - parseInt(a[0].substring(1),10))
+			.reduce((a,b) => a + b[1],''),2)
+		
+ 		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="racetrack"></div>
+</body>
+</html>
