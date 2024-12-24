@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		const graph = {};
+		
+		allLines.forEach((line) => {
+			let computers = line.split('-');
+
+			graph[computers[0]] = graph[computers[0]] || {chief: computers[0].startsWith('t'), neighbours: []};
+			graph[computers[1]] = graph[computers[1]] || {chief: computers[1].startsWith('t'), neighbours: []};
+
+			graph[computers[0]].neighbours.push(graph[computers[1]]);
+			graph[computers[1]].neighbours.push(graph[computers[0]]);
+		});
+		console.log(graph)
+		
+		const labels = Object.keys(graph).sort();
+		labels.forEach((label, i) => {
+			const node = graph[label];
+			node.index = i;
+		});
+
+		labels.forEach((label, i) => {
+			const node = graph[label];
+			node.neighbours = node.neighbours.filter(n1 => n1.index > i);
+		});
+
+		for (const node of labels) {
+			const neighbour0 = graph[node];
+			for (const neighbour1 of neighbour0.neighbours) {
+				for (const neighbour2 of neighbour1.neighbours) {
+					if (neighbour0.chief || neighbour1.chief || neighbour2.chief) {
+						if (neighbour0.neighbours.includes(neighbour2)) {
+							result++;
+						}
+					}
+				}
+			}
+		}
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="racetrack"></div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+let maxDepth = 0;
+let maxPath = [];
+
+const walk = (node, path, depth) => {
+	if (depth > maxDepth) {
+		maxDepth = depth;
+		maxPath = [...path, node];
+		console.log(maxPath)
+	}
+	for (const neighbour of node.neighbours) {
+		if (path.every(n => n.neighbours.includes(neighbour))) {
+			walk(neighbour, [...path, node], depth + 1);
+		}
+	}
+};
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		const graph = {};
+		
+		allLines.forEach((line) => {
+			let computers = line.split('-');
+
+			graph[computers[0]] = graph[computers[0]] || {label:computers[0], neighbours: []};
+			graph[computers[1]] = graph[computers[1]] || {label:computers[1], neighbours: []};
+
+			graph[computers[0]].neighbours.push(graph[computers[1]]);
+			graph[computers[1]].neighbours.push(graph[computers[0]]);
+		});
+		console.log(graph)
+		
+		const labels = Object.keys(graph).sort();
+		labels.forEach((label, i) => {
+			const node = graph[label];
+			node.index = i;
+		});
+
+		labels.forEach((label, i) => {
+			const node = graph[label];
+			node.neighbours = node.neighbours.filter(n1 => n1.index > i);
+		});
+
+		for (const node of labels) {
+			console.log(node)
+			const neighbour0 = graph[node];
+			for (const neighbour1 of neighbour0.neighbours) {
+				for (const neighbour2 of neighbour1.neighbours) {
+					walk(neighbour2, [neighbour0, neighbour1], 2);
+				}
+			}
+		}
+		console.log(maxPath)
+
+		document.getElementById('result').value = maxPath.map(n => n.label).join(',');
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="racetrack"></div>
+</body>
+</html>
