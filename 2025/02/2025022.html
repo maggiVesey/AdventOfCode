@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+	
+function hasRepeatingPattern(str) {
+    // Validate input
+    if (typeof str !== "string" || str.length === 0) {
+        return false;
+    }
+
+    // ^(.+)\1+$ means:
+    // (.+)  -> capture one or more characters
+    // \1+   -> repeat the captured group at least twice
+    // ^...$ -> match the entire string
+    const pattern = /^(.*)\1+$/;
+    return pattern.test(str);
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		
+		let result = 0
+		
+		file.split(',').map((productIDRange) => {
+    		const [rangeStart, rangeEnd] = productIDRange.split('-').map(Number)
+
+  			for(let i=rangeStart;i<=rangeEnd;i++) {
+				if(hasRepeatingPattern(i.toString())) {
+					console.log(i)
+					result += i;
+				}
+			}
+		});
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
