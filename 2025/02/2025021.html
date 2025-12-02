@@ -10,11 +10,11 @@ function hasRepeatingPatternTwice(str) {
         return false;
     }
 
-    // ^(.+)\1+$ means:
+    // ^(.+)\1{1}$ means:
     // (.+)  -> capture one or more characters
     // \1{1} -> repeat the captured group exactly twice
     // ^...$ -> match the entire string
-    const pattern = /^(.*)\1{1}$/;
+    const pattern = /^(.+)\1{1}$/;
     return pattern.test(str);
 }
 function aocFunction(input) {

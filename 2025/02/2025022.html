@@ -14,7 +14,7 @@ function hasRepeatingPattern(str) {
     // (.+)  -> capture one or more characters
     // \1+   -> repeat the captured group at least twice
     // ^...$ -> match the entire string
-    const pattern = /^(.*)\1+$/;
+    const pattern = /^(.+)\1+$/;
     return pattern.test(str);
 }
 function aocFunction(input) {
