@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+function isNegativeZero(value) {
+  return value === 0 && (1 / value === -Infinity);
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+
+		let result = 0;
+		let position = 50;
+		let previousPosition = 0;
+		
+		allLines.forEach((rotation) => {
+			let direction = rotation.substring(0,1);
+			let distance = parseInt(rotation.substring(1));
+
+			previousPosition = position;
+			let positionChange = ('L' == direction ? -1 : 1) * distance;
+			
+			let clicks = parseInt((previousPosition + positionChange) / 100)
+			if(isNegativeZero(clicks)) {
+				clicks = 1
+			}
+			if(clicks < 0) {
+				clicks = 1 + (-1 * clicks)
+			}
+			position += positionChange;
+					
+			position = position % 100;
+			if(position < 0) {
+				position += 100
+			}
+			position = position % 100
+			
+			if(0 == position && 0 == clicks) {
+				clicks = 1
+			}
+			if('L' == direction && 0 == previousPosition && clicks > 0) {
+				clicks--
+			}
+			result += clicks
+			console.log(direction,distance,previousPosition,clicks,position,result)
+		});
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
