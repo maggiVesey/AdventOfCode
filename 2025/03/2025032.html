@@ -19,17 +19,17 @@ function aocFunction(input) {
 			let batteries = bank.split('').map(Number);
 			
 			let joltage = "";
-			let batteryIndex = -1
+			let batteryIndex = 0
 			let remainingBatteries = numberOfBatteries - 1
 
 			for (let i=0;i<numberOfBatteries;i++) {
 				
-				let lastIndex = (0 != remainingBatteries) ? -1 * remainingBatteries : batteries.length
-				let remainingBank = batteries.slice(batteryIndex + 1, lastIndex)
+				let remainingBank = batteries.slice(batteryIndex, batteries.length - remainingBatteries)
 				let battery = Math.max(...remainingBank)
 
-				batteryIndex = batteryIndex + 1 + remainingBank.indexOf(battery)
 				joltage += battery
+				
+				batteryIndex = batteryIndex + remainingBank.indexOf(battery) + 1
 				remainingBatteries--
 			}
 
