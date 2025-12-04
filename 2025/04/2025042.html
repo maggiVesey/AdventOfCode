@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+const grid = []
+const removeable = []
+
+const adjacentPositions = [
+    [-1,-1],[-1,0],[-1,1],
+    [0,-1],[0,1],
+    [1,-1],[1,0],[1,1]
+];
+	
+function rollOfPaperOnGrid(row,column) {
+	if(column < 0 || row < 0) {
+		return 0;
+	}	
+	if(row >= grid.length || column >= grid[row].length) {
+		return 0;
+	}
+	return ('@' == grid[row][column]) ? 1 : 0
+}
+function checkNeighbours(i,j) {
+	let neighbours = 0;
+	
+    for(const [x,y] of adjacentPositions) {
+ 		neighbours += rollOfPaperOnGrid(i+x,j+y)
+    }
+	return neighbours;
+}
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0;
+		let moreToRemove = true;
+		
+		allLines.forEach((line) => {
+			grid.push(line.split(''))
+ 		});
+		
+		while(moreToRemove) {
+
+			moreToRemove = false;
+
+			for(let i=0;i<grid.length;i++) {
+				for(let j=0;j<grid[i].length;j++) {
+					if('@' == grid[i][j]) {
+						
+						let neighbours = checkNeighbours(i,j);
+									
+						if(neighbours < 4) {
+							removeable.push({i,j})
+							result++
+						}
+					}
+				}		
+			}
+			moreToRemove = removeable.length > 0
+			
+			while(removeable.length > 0) {
+				const rollToRemove = removeable.shift()
+				grid[rollToRemove.i][rollToRemove.j] = 'x'
+			}
+		}
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
