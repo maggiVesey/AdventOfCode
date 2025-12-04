@@ -24,13 +24,12 @@ function aocFunction(input) {
 
 			for (let i=0;i<numberOfBatteries;i++) {
 				
-				let remainingBank = batteries.slice(batteryIndex, batteries.length - remainingBatteries)
+				let remainingBank = batteries.slice(batteryIndex, batteries.length - remainingBatteries--)
 				let battery = Math.max(...remainingBank)
 
 				joltage += battery
 				
 				batteryIndex = batteryIndex + remainingBank.indexOf(battery) + 1
-				remainingBatteries--
 			}
 
 			result += parseInt(joltage)
