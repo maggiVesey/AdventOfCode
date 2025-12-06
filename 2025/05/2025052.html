@@ -15,7 +15,6 @@ function aocFunction(input) {
 		
 		let result = 0;	
 		const freshRanges = []
-		const mergedRanges = []
 		
 		allLines.forEach((line) => {
 			if(line.includes('-')) {
@@ -23,20 +22,21 @@ function aocFunction(input) {
 			}	
  		});
 
+		
 		freshRanges.sort((a, b) => a[0] - b[0])
-					.forEach((range) => {
-					    let overlapRange = mergedRanges.find((mergedRange) => mergedRange[1] >= range[0]);
-					    if(!overlapRange) {
-							mergedRanges.push(range);
-						} 
-					    else if(range[1] > overlapRange[1]) {
-							overlapRange[1] = range[1];
-					    }
-    		})
+		
+		let currentRange = freshRanges.shift()
 
-		mergedRanges.forEach((mergedRange) => {
-			result += mergedRange[1] - mergedRange[0] + 1;
-		});
+		freshRanges.forEach((range) => {
+			if(range[0] > currentRange[1]) {
+				result += currentRange[1] - currentRange[0] + 1
+				currentRange = range
+			}
+			else if(range[1] > currentRange[1]) {
+				currentRange[1] = range[1]
+			}
+		})
+		result += currentRange[1] - currentRange[0] + 1
 
 		document.getElementById('result').value = result;
 	};
