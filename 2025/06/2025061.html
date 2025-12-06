@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+	
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0;
+				
+		const operators = allLines.pop().trim().split(/\s+/)
+		const totals = allLines.shift().split(/\s+/).map(Number)
+		
+		allLines.forEach((line) => {
+			const numbers = line.trim().split(/\s+/).map(Number)
+			if(totals.length > 0) {
+				for(let i=0;i<numbers.length;i++) {
+					if('+' == operators[i]) {
+						totals[i] += numbers[i]
+					}
+					if('*' == operators[i]) {
+						totals[i] *= numbers[i]
+					}
+				}
+			}
+ 		});
+		result = totals.reduce((previous, current) => previous + current, 0);
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
