@@ -35,9 +35,11 @@ function aocFunction(input) {
 				problem.length = 0
 				newProblem = false
 			}
+			
 			for(let i=0;i<allLines.length;i++) {
 				columnNumber += allLines[i][j].trim()
 			}
+			
 			if('' != columnNumber) {
 				problem.push(parseInt(columnNumber))
 			}
