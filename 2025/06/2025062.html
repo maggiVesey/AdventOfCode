@@ -4,6 +4,14 @@
 <title>Advent of Code</title>
 <script>
 	
+function solveProblem(operator,problem) {
+	if('+' == operator) {
+		return problem.reduce((previous, current) => previous + current, 0);
+	}
+	if('*' == operator) {
+		return problem.reduce((previous, current) => previous * current, 1);
+	}
+}
 function aocFunction(input) {
 
 	const file = input.files[0];
@@ -13,26 +21,33 @@ function aocFunction(input) {
 		const file = event.target.result;
 		const allLines = file.split(/\r\n|\n/);
 		
-		let result = 0;
-				
+		let result = 0;		
+
 		const operators = allLines.pop().trim().split(/\s+/)
-		const totals = allLines.shift().trim().split(/\s+/).map(Number)
+
+		const problem = []
+		let newProblem = false
 		
-		allLines.forEach((line) => {
-			const numbers = line.trim().split(/\s+/).map(Number)
-			if(totals.length > 0) {
-				for(let i=0;i<numbers.length;i++) {
-					if('+' == operators[i]) {
-						totals[i] += numbers[i]
-					}
-					if('*' == operators[i]) {
-						totals[i] *= numbers[i]
-					}
-				}
+		for(let j=allLines[0].length - 1;j>=0;j--) {
+			let columnNumber = ''
+			
+			if(newProblem) {
+				problem.length = 0
+				newProblem = false
 			}
- 		});
-		result = totals.reduce((previous, current) => previous + current, 0);
-		
+			for(let i=0;i<allLines.length;i++) {
+				columnNumber += allLines[i][j].trim()
+			}
+			if('' != columnNumber) {
+				problem.push(parseInt(columnNumber))
+			}
+			else {
+				result += solveProblem(operators.pop(),problem)
+				newProblem = true
+			}
+		} 
+		result += solveProblem(operators.pop(),problem)
+
 		document.getElementById('result').value = result;
 	};
 
