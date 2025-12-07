@@ -36,7 +36,7 @@ function aocFunction(input) {
 			} 
 		}		
 //		console.log(manifold)
-		result = manifold[manifold.length - 1].reduce((previous, current) => previous + (!isNaN(parseInt(current)) ? parseInt(current) : 0), 0)
+		result = manifold[manifold.length - 1].reduce((previous, current) => previous + numberOrZero(current), 0)
 		document.getElementById('result').value = result;
 	};
 
