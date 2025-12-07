@@ -5,7 +5,7 @@
 <script>
 	
 function numberOrZero(cell) {
-	return !isNaN(parseInt(cell)) ? parseInt(cell) : 0
+	return isNaN(parseInt(cell)) ? 0 : parseInt(cell)
 }
 function aocFunction(input) {
 
