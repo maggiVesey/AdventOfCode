@@ -4,6 +4,9 @@
 <title>Advent of Code</title>
 <script>
 	
+function numberOrZero(cell) {
+	return !isNaN(parseInt(cell)) ? parseInt(cell) : 0
+}
 function aocFunction(input) {
 
 	const file = input.files[0];
@@ -17,21 +20,18 @@ function aocFunction(input) {
 						
 		for(let i=1;i<manifold.length;i++) {
 			for(let j=0;j<manifold[i].length;j++) {
+				
 				if('S' == manifold[i - 1][j]) {
 					manifold[i][j] = '1'
 				}
-				if('.' == manifold[i][j] && !isNaN(manifold[i - 1][j])) {
+				
+				if('.' == manifold[i][j] && numberOrZero(manifold[i - 1][j]) > 0) {
 					manifold[i][j] = manifold[i - 1][j]
 				}
-				if('^' == manifold[i][j] && !isNaN(manifold[i - 1][j])) {
-					manifold[i][j - 1] = (
-						(!isNaN(parseInt(manifold[i][j - 1])) ? parseInt(manifold[i][j - 1]) : 0) + 
-						(!isNaN(parseInt(manifold[i - 1][j])) ? parseInt(manifold[i - 1][j]) : 0)  
-						).toString()
-					manifold[i][j + 1] = (
-						(!isNaN(parseInt(manifold[i - 1][j])) ? parseInt(manifold[i - 1][j]) : 0) + 
-						(!isNaN(parseInt(manifold[i - 1][j + 1])) ? parseInt(manifold[i - 1][j + 1]) : 0)
-						).toString()
+				
+				if('^' == manifold[i][j] && numberOrZero(manifold[i - 1][j]) > 0) {
+					manifold[i][j - 1] = (numberOrZero(manifold[i - 1][j]) + numberOrZero(manifold[i][j - 1])).toString()
+					manifold[i][j + 1] = (numberOrZero(manifold[i - 1][j]) + numberOrZero(manifold[i - 1][j + 1])).toString()
 				}	
 			} 
 		}		
