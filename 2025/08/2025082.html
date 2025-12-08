@@ -34,12 +34,12 @@ function aocFunction(input) {
 			}
 		}
 		
-		const shorttestDistances = [...distanceMap.entries()].sort((a, b) => a[1] - b[1]);
+		const shortestDistances = [...distanceMap.entries()].sort((a, b) => a[1] - b[1]);
 		const circuits = []
 		
 		oneLargeCircuitFound:
-		for (let i=0;i<shorttestDistances.length;i++) {
-			let points = shorttestDistances[i][0].split(' ').map(Number)
+		for (let i=0;i<shortestDistances.length;i++) {
+			let points = shortestDistances[i][0].split(' ').map(Number)
 			
 			let newCircuit = true
 			let mergeCircuit = -1

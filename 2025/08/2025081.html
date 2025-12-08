@@ -36,11 +36,11 @@ function aocFunction(input) {
 			}
 		}
 		
-		const shorttestDistances = [...distanceMap.entries()].sort((a, b) => a[1] - b[1]);
+		const shortestDistances = [...distanceMap.entries()].sort((a, b) => a[1] - b[1]);
 		const circuits = []
 		
 		for (let i=0;i<connectionsToMake;i++) {
-			let points = shorttestDistances[i][0].split(' ').map(Number)
+			let points = shortestDistances[i][0].split(' ').map(Number)
 			
 			let newCircuit = true
 			let mergeCircuit = -1
