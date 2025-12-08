@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+	
+const junctionBoxPositions = []
+	
+function euclideanDistance(p,q) {
+	return Math.sqrt((p.x - q.x) ** 2 + (p.y - q.y) ** 2 + (p.z - q.z) ** 2)
+}	
+	
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0;
+		
+		const connectionsToMake = 1000
+						
+		let distanceMap = new Map()
+		
+		allLines.forEach((line) => {
+			const coords = line.trim().split(',').map(Number)
+			junctionBoxPositions.push({point:{x:coords[0],y:coords[1],z:coords[2]}})
+		})
+		for(let i=0;i<junctionBoxPositions.length;i++) {
+			for(let j=i+1;j<junctionBoxPositions.length;j++) {
+				let distanceMapKey = i + ' ' + j
+				distanceMap.set(distanceMapKey,euclideanDistance(junctionBoxPositions[i].point,junctionBoxPositions[j].point))
+			}
+		}
+		
+		const shorttestDistances = [...distanceMap.entries()].sort((a, b) => a[1] - b[1]);
+		const circuits = []
+		
+		for (let i=0;i<connectionsToMake;i++) {
+			let points = shorttestDistances[i][0].split(' ').map(Number)
+			
+			let newCircuit = true
+			let mergeCircuit = -1
+			
+			for(let j=0;j<circuits.length;j++) {
+				if(circuits[j].has(points[0]) || circuits[j].has(points[1])) {
+					circuits[j].add(points[0])
+					circuits[j].add(points[1])
+					if(-1 == mergeCircuit) {
+						mergeCircuit = j
+					}
+					else {
+						circuits[mergeCircuit] = circuits[mergeCircuit].union(circuits[j]);
+						circuits[j].clear()
+					}
+					newCircuit = false
+				}
+			}
+			if(newCircuit) {
+				let circuit = new Set()
+				circuit.add(points[0])
+				circuit.add(points[1])
+				circuits.push(circuit)
+			}
+		}
+		let circuitSizes = circuits.sort((a, b) => b.size - a.size)
+		
+		result = circuitSizes[0].size * circuitSizes[1].size * circuitSizes[2].size
+		
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
