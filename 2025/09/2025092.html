@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+	
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0;
+		const redTilePositions = []
+		let minX = Infinity;
+		let minY = Infinity;
+		let maxX = 0;
+		let maxY = 0;
+		
+		allLines.forEach((line) => {
+			const coords = line.trim().split(',').map(Number)
+			redTilePositions.push({x:coords[1],y:coords[0]})
+		})
+		redTilePositions.push(redTilePositions[0])
+		
+//https://www.reddit.com/r/adventofcode/comments/1pi1iju/2025_day_9_part_2_animated_visualization/
+//was massively helpful
+
+//highlights disjoint in data at row 249
+/*
+2532,52309
+2532,51107
+2444,51107
+2444,50092
+94969,50092
+94969,48695
+2401,48695
+2401,47472
+2104,47472
+2104,46252
+*/
+
+//top half
+
+		let bottomRightIndex = 249
+		let bottomRight = redTilePositions[bottomRightIndex]
+		console.log('bottomRight',bottomRightIndex,redTilePositions[bottomRightIndex].x,redTilePositions[bottomRightIndex].y)
+
+		let topRightIndex = redTilePositions.findLastIndex(tile => tile.x < bottomRight.x && tile.y <= bottomRight.y)
+		let topRight = redTilePositions[topRightIndex]
+		console.log('topRight',topRightIndex,topRight.x,topRight.y)
+
+		let topLeftIndex = redTilePositions.findLastIndex((tile,index) => tile.x >= topRight.x && index < topRightIndex && index > bottomRightIndex)
+		let topLeft = redTilePositions[topLeftIndex]
+		console.log('topLeft',topLeftIndex,topLeft.x,topLeft.y)
+
+		let rectangleArea = (Math.abs(redTilePositions[topLeftIndex].y - redTilePositions[bottomRightIndex].y) + 1) *
+							(Math.abs(redTilePositions[topLeftIndex].x - redTilePositions[bottomRightIndex].x) + 1)
+		if(rectangleArea > result) {
+			result = rectangleArea
+		}
+		
+//bottom half
+
+		topRightIndex = bottomRightIndex - 1
+		topRight = redTilePositions[topRightIndex]
+		console.log('topRight',topRightIndex,topRight.x,topRight.y)
+		
+		bottomRightIndex = redTilePositions.findIndex(tile => tile.x > topRight.x && tile.y <= topRight.y)
+		bottomRight = redTilePositions[bottomRightIndex]
+		console.log('bottomRight',bottomRightIndex,redTilePositions[bottomRightIndex].x,redTilePositions[bottomRightIndex].y)
+
+		let bottomLeftIndex = redTilePositions.findIndex((tile,index) => tile.x <= bottomRight.x && index < topRightIndex && index > bottomRightIndex)
+		let bottomLeft = redTilePositions[bottomLeftIndex]
+		console.log('bottomLeft',bottomLeftIndex,bottomLeft.x,bottomLeft.y)
+
+		rectangleArea = (Math.abs(redTilePositions[topRightIndex].y - redTilePositions[bottomLeftIndex].y) + 1) *
+						(Math.abs(redTilePositions[topRightIndex].x - redTilePositions[bottomLeftIndex].x) + 1)
+
+		if(rectangleArea > result) {
+			result = rectangleArea
+		}
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="floor"></div>
+</body>
+</html>
