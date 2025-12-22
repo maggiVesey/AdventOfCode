@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+/**
+ * Generate all possible index combinations for an array
+ * @param {Array} arr - The input array
+ * @returns {number[][]} - Array of index combinations
+ */
+function generateIndexCombinations(arr) {
+    if (!Array.isArray(arr)) {
+        throw new TypeError("Input must be an array.");
+    }
+
+    const n = arr.length;
+    const results = [];
+
+    // Helper function for recursion
+    function backtrack(start, combo) {
+        if (combo.length > 0) {
+            results.push([...combo]); // store a copy
+        }
+        for (let i = start; i < n; i++) {
+            combo.push(i);           // choose index
+            backtrack(i + 1, combo); // explore further
+            combo.pop();             // backtrack
+        }
+    }
+
+    backtrack(0, []);
+    return results;
+}	
+function mapReachableStates(schematics) {
+	const reachableStates = new Map();
+	
+	let zeroState = new Array(schematics[0].length).fill(0)
+	let zeroStateMap = new Map()
+	zeroStateMap.set(zeroState.toString(), 0)
+	
+	reachableStates.set(zeroState.toString(), zeroStateMap)
+	
+	const combinations = generateIndexCombinations(schematics)
+	combinations.forEach(combination => {
+		let newState = new Array(schematics[0].length).fill(0)
+		
+		let pattern = [...newState]
+		for(let i=0;i<combination.length;i++) {
+			for(let j=0;j<newState.length;j++) {
+				newState[j] += schematics[combination[i]][j]
+				pattern[j] = newState[j] % 2
+			}
+		}
+	    if(!reachableStates.has(pattern.toString())) {
+			reachableStates.set(pattern.toString(), new Map())
+		}
+		states = reachableStates.get(pattern.toString())
+		if (!states.has(newState.toString()) || combination.length < states.get(newState.toString())) {
+	        states.set(newState.toString(), combination.length);
+	    }
+	})
+	return reachableStates
+}
+
+function leastPresses(targetState,schematics) {
+
+  	const allStates = mapReachableStates(schematics)
+
+  	const solveAux = (currentState => {
+	  
+    let presses = Infinity;
+
+    if (currentState.every(item => item === 0)) {
+		return 0;
+	}
+    const patternKey = currentState.map(item => item % 2).toString();
+    if(!allStates.has(patternKey)) {  //allow for unreachable states
+		allStates.set(patternKey, new Map())
+	} 
+
+    const reachableStates = allStates.get(patternKey);
+
+    for (const [state, cost] of reachableStates.entries()) {
+      const statePattern = state.split(",").map(Number);
+      if (statePattern.every((p, i) => p <= currentState[i])) {
+        const newState = statePattern.map((p, i) => (currentState[i] - p) / 2);
+        presses = Math.min(presses, cost + (2 * solveAux(newState)));
+      }
+    }
+
+    return presses;
+  });
+  return solveAux(targetState);
+};
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0;
+		
+		const linePresses = []
+		
+		allLines.forEach((machine) => {
+			// match the curly brackets
+			const joltages = machine.match(/{(.*?)}/)[1].split(',').map(Number)
+			
+			const schematics = []
+			// match the round brackets
+			const schematicList = machine.match(/\((.*?)\)/g)
+			schematicList.forEach(schematicListItem => {
+				let stateChange = new Array(joltages.length).fill(0)
+				schematicListItem.match(/\d+(?:,\d+)*/)[0].split(',').map(Number).forEach(listItem => {
+					stateChange[listItem] = 1
+				})
+				schematics.push(stateChange)
+			}) 
+					
+		    result += leastPresses(Array.from(joltages),schematics);
+		})
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+	
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0;
+		
+		allLines.forEach((machine) => {
+			// match the square brackets
+			const indicatorLightDiagram = machine.match(/\[(.*?)\]/)[1].split('').map((item) => '#' == item ? 1 : 0);
+			
+			const initialState = new Array(indicatorLightDiagram.length).fill(0)
+			const schematics = []
+			// match the round brackets
+			const schematicList = machine.match(/\((.*?)\)/g)
+			schematicList.forEach(schematicListItem => {
+				const stateChange = new Array(indicatorLightDiagram.length).fill(0)
+				schematicListItem.match(/\d+(?:,\d+)*/)[0].split(',').map(Number).forEach(listItem => {
+					stateChange[listItem] = 1
+				})
+				schematics.push(stateChange)
+			}) 
+		
+		
+			let presses = 0
+		    const queue = [parseInt(initialState.join(''),2)];
+
+		    const allStates = new Map();
+		    allStates.set(queue[0], 0);
+		
+			stateFound:
+		    while (queue.length > 0) {
+				
+		        const currentState = queue.shift();
+		        const thisState = allStates.get(currentState);
+		        
+		        for (const schematic of schematics) {
+					
+		            const nextState = currentState ^ parseInt(schematic.join(''),2);
+		            
+		            if (!allStates.has(nextState)) {
+		                allStates.set(nextState, thisState + 1);
+		                if (nextState == parseInt(indicatorLightDiagram.join(''),2)) {
+							presses = thisState + 1
+							break stateFound
+						}
+		                queue.push(nextState);
+		            }
+		        }
+		    }
+		    result += presses;
+
+		})
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
