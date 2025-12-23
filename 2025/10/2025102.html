@@ -3,6 +3,8 @@
 <head>
 <title>Advent of Code</title>
 <script>
+//Algorithm based on https://www.reddit.com/r/adventofcode/comments/1pk87hl/2025_day_10_part_2_bifurcate_your_way_to_victory/	
+	
 /**
  * Generate all possible index combinations for an array
  * @param {Array} arr - The input array
@@ -68,28 +70,29 @@ function leastPresses(targetState,schematics) {
 
   	const solveAux = (currentState => {
 	  
-    let presses = Infinity;
-
-    if (currentState.every(item => item === 0)) {
-		return 0;
-	}
-    const patternKey = currentState.map(item => item % 2).toString();
-    if(!allStates.has(patternKey)) {  //allow for unreachable states
-		allStates.set(patternKey, new Map())
-	} 
-
-    const reachableStates = allStates.get(patternKey);
-
-    for (const [state, cost] of reachableStates.entries()) {
-      const statePattern = state.split(",").map(Number);
-      if (statePattern.every((p, i) => p <= currentState[i])) {
-        const newState = statePattern.map((p, i) => (currentState[i] - p) / 2);
-        presses = Math.min(presses, cost + (2 * solveAux(newState)));
-      }
-    }
-
-    return presses;
+	    let presses = Infinity;
+	
+	    if (currentState.every(item => item === 0)) {
+			return 0;
+		}
+	    const patternKey = currentState.map(item => item % 2).toString();
+	    if(!allStates.has(patternKey)) {  //allow for unreachable states!
+			allStates.set(patternKey, new Map())
+		} 
+	
+	    const reachableStates = allStates.get(patternKey);
+	
+	    for (const [state, cost] of reachableStates.entries()) {
+	      const statePattern = state.split(",").map(Number);
+	      if (statePattern.every((p, i) => p <= currentState[i])) {
+	        const newState = statePattern.map((p, i) => (currentState[i] - p) / 2);
+	        presses = Math.min(presses, cost + (2 * solveAux(newState)));
+	      }
+	    }
+	
+	    return presses;
   });
+  
   return solveAux(targetState);
 };
 
@@ -103,8 +106,6 @@ function aocFunction(input) {
 		const allLines = file.split(/\r\n|\n/);
 		
 		let result = 0;
-		
-		const linePresses = []
 		
 		allLines.forEach((machine) => {
 			// match the curly brackets
