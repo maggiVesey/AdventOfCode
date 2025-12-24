@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+	
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+		const allLines = file.split(/\r\n|\n/);
+		
+		const include = ['dac','fft']
+		const devices = []
+	
+		let result = 0;
+				
+		allLines.forEach((line,index) => {
+		    const [fromDevice, outputDevices] = line.split(': ');
+		    devices[fromDevice] = outputDevices.split(' ');
+		})
+		
+		let memo = {};
+		
+		function countPaths(device, visited) {
+		    if(device === 'dac') {
+				visited |= 1;
+			}
+		    if(device === 'fft') {
+				visited |= 2;
+			}
+		    if(device === 'out') {
+		        return visited === 3 ? 1 : 0;
+		    }
+		    const key = device + visited;
+		    if(memo[key] !== undefined) {
+				return memo[key];
+			}
+		    let count = 0;
+		    for(const outputDevice of devices[device] || []) {
+		        count += countPaths(outputDevice,visited);
+		    }
+		    memo[key] = count;
+		    return count;
+		}
+		document.getElementById('result').value = countPaths('svr',0)
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		document.getElementById('result').value = 0;
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
