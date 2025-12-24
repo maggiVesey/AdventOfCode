@@ -23,27 +23,27 @@ function aocFunction(input) {
 		    devices[fromDevice] = outputDevices.split(' ');
 		})
 		
-		let memo = {};
+	    const visited = new Map();
 		
-		function countPaths(device, visited) {
+		function countPaths(device, problemCount) {
 		    if(device === 'dac') {
-				visited |= 1;
+				problemCount |= 1;
 			}
 		    if(device === 'fft') {
-				visited |= 2;
+				problemCount |= 2;
 			}
 		    if(device === 'out') {
-		        return visited === 3 ? 1 : 0;
+		        return problemCount === 3 ? 1 : 0;
 		    }
-		    const key = device + visited;
-		    if(memo[key] !== undefined) {
-				return memo[key];
+		    const key = device + problemCount;
+		    if(visited.has(key)) {
+				return visited.get(key);
 			}
 		    let count = 0;
 		    for(const outputDevice of devices[device] || []) {
-		        count += countPaths(outputDevice,visited);
+		        count += countPaths(outputDevice,problemCount);
 		    }
-		    memo[key] = count;
+		    visited.set(key,count);
 		    return count;
 		}
 		document.getElementById('result').value = countPaths('svr',0)
