@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const file = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		
+		allLines.forEach((line) => {
+			const dims = line.split('x').map(Number)
+			
+			let perimeter1 = 2 * (dims[0] + dims[1])
+			let perimeter2 = 2 * (dims[1] + dims[2])
+			let perimeter3 = 2 * (dims[2] + dims[0])
+			
+			let smallest = Math.min(perimeter1,perimeter2,perimeter3)
+			let bow = dims[0] * dims[1] * dims[2]
+			
+			console.log(smallest,bow)
+			result += smallest + bow
+		});
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(file);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
