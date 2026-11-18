@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const moves = file.split('')
+		
+		let result = 0
+		let houses = new Map()
+		
+		let x = 0
+		let y = 0
+		
+		let position = x + '_' + y
+		
+		houses.set(position,(houses.get(position) || 0) + 1)
+		
+		moves.forEach((move) => {
+			switch (move) {
+				case '^':
+					y--
+					break
+				case '>':
+					x++
+					break
+				case 'v':
+					y++
+					break
+				case '<':
+					x--
+					break
+				default:
+					break
+			}
+			position = x + '_' + y
+			houses.set(position,(houses.get(position) || 0) + 1)
+		});
+		
+		result = houses.size 
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
