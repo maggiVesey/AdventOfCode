@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		
+		allLines.forEach((line) => {
+//			const vowels = (line.match(/[aeiou]/g) || []).length;
+//			const doubles = (line.match(/(.)(\1+)/g) || []).length;
+//			const excludes = (line.match(/ab|cd|pq|xy/g) || []).length;
+//			console.log(vowels,doubles,excludes)
+			
+			if((line.match(/[aeiou]/g) || []).length >= 3 &&
+				(line.match(/(.)(\1+)/g) || []).length >= 1 &&	
+				(line.match(/ab|cd|pq|xy/g) || []).length == 0) {
+				result++
+			}
+		});
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
