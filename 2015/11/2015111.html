@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+function replaceChar(origString, newChar, index) {
+	let newStringArray = origString.split("");
+	newStringArray[index] = newChar;
+	return newStringArray.join("");
+}
+function containsForbiddenChars(password) {
+	const invalidLetters = ['i','o','l']
+	for(let i=0;i<password.length;i++) {
+		if(invalidLetters.includes(password.charAt(i))) {
+			return true
+		}
+	}
+	return false
+}
+function threeConsecutive(password) {
+	for(let i=0;i<password.length - 2;i++) {
+		if(password.charAt(i+2).charCodeAt(0) - password.charAt(i+1).charCodeAt(0) == 1 &&
+			password.charAt(i+1).charCodeAt(0) - password.charAt(i).charCodeAt(0) == 1) {
+			return true
+		}
+	}
+	return false
+}
+function twoPairs(password) {
+	let countPairs = 0
+	let firstPairLetter = ''
+	for(let i=0;i<password.length - 1;i++) {
+		if(password.charAt(i+1) == password.charAt(i) && password.charAt(i) != firstPairLetter) {
+			if(firstPairLetter == '') {
+				firstPairLetter = password.charAt(i)
+			}
+			countPairs++
+		}
+	}
+	return countPairs >= 2
+}
+function isValidPassword(password) {
+	if(containsForbiddenChars(password)) {
+		return false
+	}
+	if(!threeConsecutive(password)) {
+		return false
+	}
+	if(!twoPairs(password)) {
+		return false
+	}
+	return true
+}
+
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		let result = ''
+		let nextPassword = file
+		
+		do {
+			let index = nextPassword.length - 1
+			
+			let changePreviousLetter = true
+			
+			while(changePreviousLetter) {
+				let nextLetter = ''
+				if(nextPassword.charAt(index) != 'z') {
+					nextLetter = String.fromCharCode(nextPassword.charAt(index).charCodeAt(0) + 1)
+					changePreviousLetter = false
+				}
+				else {
+					nextLetter = 'a'
+					changePreviousLetter = true
+				}
+				nextPassword = replaceChar(nextPassword,nextLetter,index)
+				if(changePreviousLetter) {
+					index--
+				}
+			}
+		} while(!isValidPassword(nextPassword))
+		
+		result = nextPassword
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
