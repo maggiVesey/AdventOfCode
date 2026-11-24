@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+/**
+ * Generate all unique circular permutations using all elements of the array.
+ * @param {Array} arr - Input array
+ * @returns {Array<Array>} - Array of unique circular permutations
+ */
+function getFullCircularPermutations(arr) {
+    if (!Array.isArray(arr)) {
+        throw new TypeError("Input must be an array.");
+    }
+    if (arr.length === 0) {
+        return [];
+    }
+
+    const result = [];
+    const seen = new Set();
+    const used = new Array(arr.length).fill(false);
+
+    // Recursive helper to generate permutations
+    function permute(current) {
+        if (current.length === arr.length) {
+            const normalized = normalizeRotation(current);
+            const key = normalized.join("|");
+            if (!seen.has(key)) {
+                seen.add(key);
+                result.push(normalized);
+            }
+            return;
+        }
+
+        for (let i = 0; i < arr.length; i++) {
+            if (!used[i]) {
+                used[i] = true;
+                current.push(arr[i]);
+                permute(current);
+                current.pop();
+                used[i] = false;
+            }
+        }
+    }
+
+    // Normalize sequence by picking smallest lexicographic rotation
+    function normalizeRotation(seq) {
+        const rotations = [];
+        for (let i = 0; i < seq.length; i++) {
+            rotations.push(seq.slice(i).concat(seq.slice(0, i)));
+        }
+        rotations.sort();
+        return rotations[0];
+    }
+
+    permute([]);
+    return result;
+}
+
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		
+		const people = new Set()
+		const happiness = new Map()
+		
+		allLines.forEach((line) => {
+			const info = line.split(' ')
+
+			let person1 = info[0]
+			let person2 = info.at(-1).slice(0, -1)
+			people.add(person1)
+			people.add(person2)
+			happiness.set(person1 + '-' + person2,(info[2] == 'lose' ? -1 : 1) * parseInt(info[3]))
+		});
+		
+		console.log(people)
+		console.log(happiness)
+		
+		const allArrangements = getFullCircularPermutations([...people])
+		console.log('a',allArrangements)
+
+		for(let i=0;i<allArrangements.length;i++) {
+			let totalHappiness = 0
+			for(let j=0;j<allArrangements[i].length;j++) {
+				let clockwiseHappiness = happiness.get(allArrangements[i][j] + '-' + allArrangements[i][(j+1 < allArrangements[i].length) ? j+1 : 0])
+				let anticlockwiseHappiness = happiness.get(allArrangements[i][j] + '-' + allArrangements[i][(j>0) ? j-1 : allArrangements[i].length - 1])
+				totalHappiness += clockwiseHappiness + anticlockwiseHappiness
+			}
+			if(totalHappiness > result) {
+				result = totalHappiness
+			}
+		}
+
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
