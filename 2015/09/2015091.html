@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+/**
+ * Generate all permutations of an array's elements.
+ * @param {Array} arr - Input array
+ * @returns {Array<Array>} - Array of permutations
+ */
+function getAllPermutations(arr) {
+    if (!Array.isArray(arr)) {
+        throw new TypeError("Input must be an array.");
+    }
+    if (arr.length === 0) {
+        return [[]]; // Only empty permutation
+    }
+
+    const result = [];
+
+    // Recursive helper function
+    function permute(current, remaining) {
+        if (remaining.length === 0) {
+            result.push([...current]); // store a copy
+            return;
+        }
+
+        for (let i = 0; i < remaining.length; i++) {
+            const next = remaining[i];
+            const rest = remaining.slice(0, i).concat(remaining.slice(i + 1));
+            current.push(next);
+            permute(current, rest);
+            current.pop();
+        }
+    }
+
+    permute([], arr);
+    return result;
+}
+
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = Infinity
+		
+		const cities = new Set()
+		const lines = new Map()
+		
+		allLines.forEach((line) => {
+			const info = line.split(' = ')
+			const locations = info[0].split(' to ')
+			let distance = parseInt(info[1])
+
+			lines.set(locations[0] + '-' + locations[1],distance)
+			lines.set(locations[1] + '-' + locations[0],distance)
+			cities.add(locations[0])
+			cities.add(locations[1])
+		});
+		const allRoutes = getAllPermutations([...cities])
+
+		for(let i=0;i<allRoutes.length;i++) {
+			let routeDistance = 0
+			for(let j=0;j<allRoutes[i].length - 1;j++) {
+				routeDistance += lines.get(allRoutes[i][j] + '-' + allRoutes[i][j+1])
+				if(routeDistance > result) {
+					break 
+				}
+			}
+			if(routeDistance < result) {
+				result = routeDistance
+			}
+		}
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
