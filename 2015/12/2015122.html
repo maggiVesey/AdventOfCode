@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		let result = 0
+		
+		let json = JSON.parse(file)
+		
+		const parseDocument = (thisNode) => {
+			
+			if (typeof thisNode == "number") { 
+				result += thisNode 
+				return
+			}
+		    
+		    if (typeof thisNode != "object") { 
+		    	return 
+		    }
+		    
+		    if (Array.isArray(thisNode)) { 
+		        for (const item of thisNode) { 
+		        	parseDocument(item) 
+		        }	        
+		        return
+		    }
+		    
+		    const values = Object.values(thisNode)    
+		    if (values.includes("red")) {
+		    	return 
+		    }
+		    
+		    const keys = Object.keys(thisNode)    
+
+		    for (const key of keys) { 
+		    	parseDocument(thisNode[key]) 
+		    }		
+		}
+		parseDocument(json)
+//		console.log(json)
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
