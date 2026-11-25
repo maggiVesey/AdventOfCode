@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		
+		let totalSeconds = 2503
+		const racers = []
+		
+		allLines.forEach((line) => {
+			const info = line.split(' ')
+
+			let reindeer = info[0]
+			let speed = parseInt(info[3])
+			let speedTime = parseInt(info[6])
+			let restTime = parseInt(info[13])
+			
+			racers.push({reindeer:reindeer,speed:speed,speedTime:speedTime,restTime:restTime,distance:0,points:0})
+		});
+		
+		for(let i=1;i<=totalSeconds;i++) {
+			
+			racers.forEach((racer) => {
+				racer.distance = 0
+				
+				let cycleTime = racer.speedTime + racer.restTime
+				let completeCycles = Math.floor(i / cycleTime)
+				
+				let partialCycleTime = i - (completeCycles * cycleTime)
+				
+				if (partialCycleTime > racer.speedTime) {
+					partialCycleDistance = racer.speed * racer.speedTime
+				}
+				else {
+					partialCycleDistance = racer.speed * partialCycleTime
+				}
+				racer.distance = (racer.speed * racer.speedTime * completeCycles) + partialCycleDistance
+			})
+			
+			racers.sort((a,b) => b.distance - a.distance)
+			let longestDistance = racers[0].distance
+			for(let j=0;j<racers.length;j++) {
+				if(racers[j].distance == longestDistance) {
+					racers[j].points++
+				}
+				else {
+					break
+				}
+			}
+		}
+		racers.sort((a,b) => b.points - a.points)
+		console.log(racers)
+		
+		result = racers[0].points
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
