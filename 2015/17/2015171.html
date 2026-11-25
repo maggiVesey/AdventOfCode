@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+/**
+ * Generate all possible index combinations for an array
+ * @param {Array} arr - The input array
+ * @returns {number[][]} - Array of index combinations
+ */
+function generateIndexCombinations(arr) {
+    if (!Array.isArray(arr)) {
+        throw new TypeError("Input must be an array.");
+    }
+
+    const n = arr.length;
+    const results = [];
+
+    // Helper function for recursion
+    function backtrack(start, combo) {
+        if (combo.length > 0) {
+            results.push([...combo]); // store a copy
+        }
+        for (let i = start; i < n; i++) {
+            combo.push(i);           // choose index
+            backtrack(i + 1, combo); // explore further
+            combo.pop();             // backtrack
+        }
+    }
+
+    backtrack(0, []);
+    return results;
+}	
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		let target = 150
+		const containers = []
+		
+		allLines.forEach((line) => {
+			containers.push(parseInt(line))	
+		});
+		
+		const combinations = generateIndexCombinations(containers)
+		combinations.forEach((combination) => {
+			let capacity = 0
+			combination.forEach((config) => {
+				capacity += containers[config]
+			})
+			if(capacity == target) {
+				result++
+			}
+		})
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
