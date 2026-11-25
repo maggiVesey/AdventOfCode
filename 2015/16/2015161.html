@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		
+		const compoundCount = (line,compound) => {
+			const thisCompound = line.split(compound)
+			if(thisCompound.length > 1){
+				return parseInt(thisCompound[1].substring(1).split(',')[0])
+			}
+			return -1
+		}
+
+		allLines.forEach((line) => {
+			
+			let thisSue = {
+				children: compoundCount(line,'children'),
+				cats: compoundCount(line,'cats'),
+				samoyeds: compoundCount(line,'samoyeds'),
+				pomeranians: compoundCount(line,'pomeranians'),
+				akitas: compoundCount(line,'akitas'),
+				vizslas: compoundCount(line,'vizslas'),
+				goldfish: compoundCount(line,'goldfish'),
+				trees: compoundCount(line,'trees'),
+				cars: compoundCount(line,'cars'),
+				perfumes: compoundCount(line,'perfumes')
+			}
+			if(
+				(thisSue.children == 3 || thisSue.children == -1) &&
+				(thisSue.cats == 7 || thisSue.cats == -1) &&
+				(thisSue.samoyeds == 2 || thisSue.samoyeds == -1) &&
+				(thisSue.pomeranians == 3 || thisSue.pomeranians == -1) &&
+				(thisSue.akitas == 0 || thisSue.akitas == -1) &&
+				(thisSue.vizslas == 0 || thisSue.vizslas == -1) &&
+				(thisSue.goldfish == 5 || thisSue.goldfish == -1) &&
+				(thisSue.trees == 3 || thisSue.trees == -1) &&
+				(thisSue.cars == 2 || thisSue.cars == -1) &&
+				(thisSue.perfumes == 1 || thisSue.perfumes == -1)) {
+				
+				result = parseInt(line.split(':')[0].split(' ')[1])
+			}
+			
+		});
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
