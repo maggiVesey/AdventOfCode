@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<script>
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		const ingredients = []
+		
+		allLines.forEach((line) => {
+			const info = line.split(':')
+
+			let ingredient = info[0]
+			const composition = info[1].match(/-?\d+/g)
+			
+			ingredients.push({ingredient:ingredient,capacity:parseInt(composition[0]),durability:parseInt(composition[1]),flavor:parseInt(composition[2]),texture:parseInt(composition[3]),calories:parseInt(composition[4])})
+		});
+		const proportions = Array.from(ingredients).fill(0)  // array same length as ingredients
+								// sum of value must be 100
+								
+//		proportions[0] = 44
+//		proportions[1] = 56
+		
+		const sumOtherProportions = () => {
+			let sum = 0
+			for(let i=1;i<proportions.length;i++) {
+				sum += proportions[i]
+			}
+			return sum
+		}
+		
+		// this is specific to this problem 'cos we know there are 4 ingredients
+		for(let x=0;x<=100;x++) {
+			for(let y=0;y<=100;y++) {
+				for(let z=0;z<=100;z++) {
+					
+					proportions[1] = x
+					proportions[2] = y
+					proportions[3] = z
+
+					proportions[0] = 100 - sumOtherProportions()
+					if(proportions[0] < 0) {
+						continue
+					}
+					
+					let capacity = 0
+					let durability = 0
+					let flavor = 0
+					let texture = 0 
+				
+					for (let i=0;i<proportions.length;i++) {
+						capacity += proportions[i] * ingredients[i].capacity 
+						durability += proportions[i] * ingredients[i].durability 
+						flavor += proportions[i] * ingredients[i].flavor 
+						texture += proportions[i] * ingredients[i].texture 
+					}
+					if(capacity > 0 && durability > 0 && flavor > 0 && texture > 0) {
+						let totalScore = capacity * durability * flavor * texture
+						if(totalScore > result) {
+//							console.log(totalScore,proportions)
+							result = totalScore
+						}
+					}
+				}
+			}
+		}
+		
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+</body>
+</html>
