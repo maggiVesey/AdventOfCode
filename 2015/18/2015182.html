@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Advent of Code</title>
+<style>
+	div {
+		font-family:monospace;
+		font-size:100%;
+	}
+</style>
+<script>
+function drawGrid(grid) {
+	let tableString = '<table>'
+	for(let i=0;i<grid.length;i++) {
+		tableString += '<tr>'
+		for(let j=0;j<grid[i].length;j++) {
+			tableString += '<td';
+			tableString += ' id="td_'+i+'_'+j+'"';
+			tableString += '>'
+			tableString += grid[i][j]
+			tableString += '</td>'
+		}
+		tableString += '</tr>'
+	}
+	tableString += '</table>'
+	document.getElementById("grid").innerHTML = tableString;
+}
+const adjacentPositions = [
+    [-1,-1],[-1,0],[-1,1],
+    [0,-1],[0,1],
+    [1,-1],[1,0],[1,1]
+];
+	
+function getNeighbour(grid,row,column) {
+	if(column < 0 || row < 0) {
+		return 0;
+	}	
+	if(row >= grid.length || column >= grid[row].length) {
+		return 0;
+	}
+	return grid[row][column]
+}
+
+function aocFunction(input) {
+
+	const inputFile = input.files[0];
+	const reader = new FileReader();
+
+	reader.onload = (event) => {
+		const file = event.target.result;
+
+		const allLines = file.split(/\r\n|\n/);
+		
+		let result = 0
+		let steps = 100
+		
+		const grid = [];
+		const changedLights = [];
+
+		allLines.forEach((line) => {
+			const newRow = []
+			const lights = line.split('')
+			lights.forEach((light) => {
+				newRow.push((light == '#') ? 1 : 0)
+			})
+			grid.push(newRow)
+ 		});
+		
+		grid[0][0] = 1
+		grid[0][grid[0].length-1] = 1
+		grid[grid.length - 1][0] = 1
+		grid[grid.length - 1][grid[grid.length - 1].length-1] = 1
+
+//   		drawGrid(grid)
+   		
+   		for(let i=0;i<steps;i++) {
+   			
+   			for(let j=0;j<grid.length;j++) {
+   	   			for(let k=0;k<grid[j].length;k++) {
+   	   				let neighboursOn = 0
+	   	 	        for(const [x,y] of adjacentPositions) {
+	   	 	        	neighboursOn += getNeighbour(grid,j+x,k+y)
+	   	    		}
+   	   				if(j==0 && k==0) {
+   	   					continue
+   	   				}
+   	   				if(j==0 && k==grid[0].length-1) {
+   	   					continue
+   	   				}
+   	   				if(j==grid.length - 1 && k==0) {
+   	   					continue
+   	   				}
+   	   				if(j==grid.length - 1 && k==grid[grid.length - 1].length-1) {
+   	   					continue
+   	   				}
+   	   				if(grid[j][k] == 1 && neighboursOn != 2 && neighboursOn != 3) {
+   	   					changedLights.push({j:j,k:k})
+   	   				}
+   	   				if(grid[j][k] == 0 && neighboursOn == 3) {
+  	   					changedLights.push({j:j,k:k})
+   	   				}
+   	   			}
+   			}
+   			while(changedLights.length > 0) {
+   				const changedLight = changedLights.shift()
+   				grid[changedLight.j][changedLight.k] = 1 - grid[changedLight.j][changedLight.k]
+   			}
+   		}
+//		drawGrid(grid)
+		
+		result = grid.flat().reduce((total, currentValue) => total + currentValue,0);
+		document.getElementById('result').value = result;
+	};
+
+	reader.onerror = (event) => {
+		alert(event.target.error.name);
+	};
+
+	reader.readAsText(inputFile);
+}
+
+window.onload = function() {
+	document.getElementById('file').addEventListener('change',function() {
+		aocFunction(this)
+	})
+}
+
+</script>
+</head>
+<body>
+	<input type="file" name="file" id="file" accept=".txt">
+	<hr />
+	<label for="result">Result</label>
+	<textarea id="result"></textarea>
+	<div id="grid"></div>
+</body>
+</html>
